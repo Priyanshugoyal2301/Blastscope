@@ -170,3 +170,75 @@ export interface PIEnvelope {
   points: PIEnvelopePoint[];
 }
 
+// ─── Sprint 5: Parametric Studies ────────────────────────────────────────────
+
+export type StudyType = 'distance' | 'charge' | 'explosive' | 'grid';
+
+export interface SweepPoint {
+  // Provenance
+  study_id: string;
+  study_type: string;
+  explosive_name: string;
+  // Scenario
+  charge_kg: number;
+  distance_m: number;
+  scaled_distance: number;
+  // Blast environment
+  peak_pressure_kPa: number;
+  peak_impulse_kPa_ms: number;
+  reflected_pressure_kPa: number;
+  arrival_time_ms: number;
+  // Assessment
+  profile_id: number;
+  profile_name: string;
+  family: string;
+  damage_level: 'Safe' | 'Minor' | 'Moderate' | 'Severe' | 'Failure';
+  damage_state: string;
+  severity_score: number;
+  controlling_mode: string;
+  damage_index: number;
+  pressure_ratio: number;
+  impulse_ratio: number;
+}
+
+export interface VulnerabilityRanking {
+  rank: number;
+  profile_id: number;
+  profile_name: string;
+  family: string;
+  mean_severity: number;
+  vulnerability_score: number;
+  min_safe_standoff_m: number | null;
+  failure_radius_m: number | null;
+}
+
+export interface GridResult {
+  study_id: string;
+  study_type: string;
+  explosive_name: string;
+  charges_kg: number[];
+  distances_m: number[];
+  profile_ids: number[];
+  n_points: number;
+  points: SweepPoint[];
+  summary: VulnerabilityRanking[];
+}
+
+export interface StudyConfig {
+  studyType: StudyType;
+  explosiveId: number;
+  explosiveIds?: number[];       // for explosive comparison
+  chargeKg: number;
+  chargesKg?: number[];          // for charge sweep / grid
+  distanceM: number;
+  distancesM?: number[];         // for distance sweep / grid
+  profileIds: number[];
+  burstType: 'Surface' | 'Air' | 'Free Air';
+}
+
+// Point limit tiers (mirrors backend/studies/batch_runner.py)
+export const STUDY_LIMITS = {
+  IMMEDIATE: 2000,
+  SOFT: 5000,
+  HARD: 10000,
+} as const;

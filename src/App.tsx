@@ -5,12 +5,14 @@ import ScenarioInput from './screens/ScenarioInput';
 import BlastResultsScreen from './screens/BlastResults';
 import MaterialAssessmentScreen from './screens/MaterialAssessment';
 import ResearchWorkspace from './screens/ResearchWorkspace';
+import ParametricStudy from './screens/ParametricStudy';
+import VulnerabilityMap from './screens/VulnerabilityMap';
 import { api } from './services/api';
-import { Scenario, Explosive, MaterialProfile, BlastResults, DamageAssessment } from './types';
+import { Scenario, Explosive, MaterialProfile, BlastResults, DamageAssessment, GridResult } from './types';
 import { BookOpen } from 'lucide-react';
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState<'input' | 'results' | 'assessment' | 'workspace'>('input');
+  const [currentScreen, setCurrentScreen] = useState<'input' | 'results' | 'assessment' | 'workspace' | 'study' | 'vulnmap'>('input');
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [explosives, setExplosives] = useState<Explosive[]>([]);
   const [profiles, setProfiles] = useState<MaterialProfile[]>([]);
@@ -18,6 +20,8 @@ export default function App() {
   
   const [activeResults, setActiveResults] = useState<BlastResults | null>(null);
   const [activeAssessments, setActiveAssessments] = useState<DamageAssessment[]>([]);
+  const [gridResult, setGridResult] = useState<GridResult | null>(null);
+  void setGridResult; // will be wired when ParametricStudy emits a GridResult
   const [isUfcOpen, setIsUfcOpen] = useState(false);
 
   // Load baseline seeds on startup
@@ -140,6 +144,20 @@ export default function App() {
               activeResults={activeResults}
               profiles={profiles}
               assessments={activeAssessments}
+            />
+          )}
+
+          {currentScreen === 'study' && (
+            <ParametricStudy
+              explosives={explosives}
+              profiles={profiles}
+            />
+          )}
+
+          {currentScreen === 'vulnmap' && (
+            <VulnerabilityMap
+              gridResult={gridResult}
+              profiles={profiles}
             />
           )}
         </div>

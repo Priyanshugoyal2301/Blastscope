@@ -1,4 +1,4 @@
-import { Scenario, ScenarioSavePayload, Explosive, MaterialProfile, BlastResults, DamageAssessment, UnitDefinition, UfcReference, ResearchNote, ValidationCase, ValidationSummary, PIEnvelope } from '../types';
+import { Scenario, ScenarioSavePayload, Explosive, MaterialProfile, BlastResults, DamageAssessment, UnitDefinition, UfcReference, ResearchNote, ValidationCase, ValidationSummary, PIEnvelope, SweepPoint, GridResult } from '../types';
 
 declare global {
   interface Window {
@@ -501,5 +501,178 @@ export const api = {
       );
       return Promise.resolve(filtered);
     }
-  }
+  },
+
+  // ─── Studies (Sprint 5) ────────────────────────────────────────────────────
+  studies: {
+    async distanceSweep(params: {
+      explosive_id: number;
+      charge_kg: number;
+      distances_m: number[];
+      profile_ids: number[];
+      burst_type?: string;
+    }): Promise<SweepPoint[]> {
+      if (isElectron) {
+        return window.api!.invoke('studies:distanceSweep', params);
+      }
+      // Browser fallback: simulate a simple 3-point sweep
+      return Promise.resolve(
+        params.distances_m.map((d, i) => ({
+          study_id: 'browser-demo',
+          study_type: 'distance_sweep',
+          explosive_name: 'TNT',
+          charge_kg: params.charge_kg,
+          distance_m: d,
+          scaled_distance: d / Math.pow(params.charge_kg, 1 / 3),
+          peak_pressure_kPa: 500 / (d * d),
+          peak_impulse_kPa_ms: 200 / d,
+          reflected_pressure_kPa: 1000 / (d * d),
+          arrival_time_ms: d / 340 * 1000,
+          profile_id: params.profile_ids[0] ?? 1,
+          profile_name: 'Reinforced Concrete M30',
+          family: 'Concrete',
+          damage_level: i < 2 ? 'Severe' : 'Moderate',
+          damage_state: i < 2 ? 'Scabbing' : 'Spalling',
+          severity_score: i < 2 ? 0.72 : 0.52,
+          controlling_mode: 'Pressure',
+          damage_index: i < 2 ? 2.1 : 1.4,
+          pressure_ratio: i < 2 ? 2.1 : 1.4,
+          impulse_ratio: i < 2 ? 1.8 : 1.1,
+        } as SweepPoint))
+      );
+    },
+
+    async chargeSweep(params: {
+      explosive_id: number;
+      charges_kg: number[];
+      distance_m: number;
+      profile_ids: number[];
+      burst_type?: string;
+    }): Promise<SweepPoint[]> {
+      if (isElectron) {
+        return window.api!.invoke('studies:chargeSweep', params);
+      }
+      return Promise.resolve(
+        params.charges_kg.map((c, i) => ({
+          study_id: 'browser-demo',
+          study_type: 'charge_sweep',
+          explosive_name: 'TNT',
+          charge_kg: c,
+          distance_m: params.distance_m,
+          scaled_distance: params.distance_m / Math.pow(c, 1 / 3),
+          peak_pressure_kPa: 50 * c / (params.distance_m * params.distance_m),
+          peak_impulse_kPa_ms: 20 * Math.pow(c, 1/3) / params.distance_m,
+          reflected_pressure_kPa: 100 * c / (params.distance_m * params.distance_m),
+          arrival_time_ms: params.distance_m / 340 * 1000,
+          profile_id: params.profile_ids[0] ?? 1,
+          profile_name: 'Reinforced Concrete M30',
+          family: 'Concrete',
+          damage_level: i > 2 ? 'Failure' : 'Severe',
+          damage_state: i > 2 ? 'Breaching' : 'Scabbing',
+          severity_score: Math.min(1.0, 0.5 + i * 0.12),
+          controlling_mode: 'Pressure',
+          damage_index: 1.5 + i * 0.4,
+          pressure_ratio: 1.5 + i * 0.4,
+          impulse_ratio: 1.2 + i * 0.3,
+        } as SweepPoint))
+      );
+    },
+
+    async explosiveComparison(params: {
+      explosive_ids: number[];
+      charge_kg: number;
+      distances_m: number[];
+      profile_ids: number[];
+      burst_type?: string;
+    }): Promise<SweepPoint[]> {
+      if (isElectron) {
+        return window.api!.invoke('studies:explosiveComparison', params);
+      }
+      const explosiveNames = ['TNT', 'C4', 'ANFO'];
+      const points: SweepPoint[] = [];
+      params.explosive_ids.forEach((eid, ei) => {
+        params.distances_m.forEach((d, _di) => {
+          const factor = eid === 2 ? 1.37 : eid === 3 ? 0.82 : 1.0;
+          points.push({
+            study_id: 'browser-demo',
+            study_type: 'explosive_comparison',
+            explosive_name: explosiveNames[ei] ?? 'TNT',
+            charge_kg: params.charge_kg,
+            distance_m: d,
+            scaled_distance: d / Math.pow(params.charge_kg * factor, 1/3),
+            peak_pressure_kPa: 500 * factor / (d * d),
+            peak_impulse_kPa_ms: 200 * factor / d,
+            reflected_pressure_kPa: 1000 * factor / (d * d),
+            arrival_time_ms: d / 340 * 1000,
+            profile_id: params.profile_ids[0] ?? 1,
+            profile_name: 'Reinforced Concrete M30',
+            family: 'Concrete',
+            damage_level: 'Moderate',
+            damage_state: 'Spalling',
+            severity_score: 0.48,
+            controlling_mode: 'Pressure',
+            damage_index: 1.5,
+            pressure_ratio: 1.5,
+            impulse_ratio: 1.2,
+          } as SweepPoint);
+        });
+      });
+      return Promise.resolve(points);
+    },
+
+    async runGrid(params: {
+      explosive_id: number;
+      charges_kg: number[];
+      distances_m: number[];
+      profile_ids: number[];
+      burst_type?: string;
+    }): Promise<GridResult> {
+      if (isElectron) {
+        return window.api!.invoke('studies:runGrid', params);
+      }
+      const pts = await api.studies.distanceSweep({
+        explosive_id: params.explosive_id,
+        charge_kg: params.charges_kg[0] ?? 100,
+        distances_m: params.distances_m,
+        profile_ids: params.profile_ids,
+      });
+      return Promise.resolve({
+        study_id: 'browser-demo',
+        study_type: 'grid',
+        explosive_name: 'TNT',
+        charges_kg: params.charges_kg,
+        distances_m: params.distances_m,
+        profile_ids: params.profile_ids,
+        n_points: pts.length,
+        points: pts,
+        summary: [{
+          rank: 1,
+          profile_id: 1,
+          profile_name: 'Reinforced Concrete M30',
+          family: 'Concrete',
+          mean_severity: 0.62,
+          vulnerability_score: 0.71,
+          min_safe_standoff_m: 45.0,
+          failure_radius_m: 12.0,
+        }],
+      } as GridResult);
+    },
+
+    async exportCSV(sweep_points: SweepPoint[], save_path?: string): Promise<{ path: string; n_rows: number }> {
+      if (isElectron) {
+        return window.api!.invoke('studies:exportCSV', { sweep_points, save_path });
+      }
+      // Browser: create a download link
+      const headers = Object.keys(sweep_points[0] ?? {});
+      const rows = sweep_points.map(p => headers.map(h => (p as any)[h]).join(','));
+      const csv = [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `blastscope_${sweep_points[0]?.study_id ?? 'export'}.csv`;
+      a.click();
+      return Promise.resolve({ path: 'browser-download', n_rows: sweep_points.length });
+    },
+  },
 };

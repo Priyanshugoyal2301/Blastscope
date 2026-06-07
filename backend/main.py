@@ -7,6 +7,9 @@ from backend.blast_engine.services.blast_calculator import BlastCalculatorServic
 from backend.blast_engine.core.unit_converter import convert
 from backend.assessment.damage_engine import DamageEngine
 from backend.validation.scenario_validator import validate_scenario_params, ValidationError
+from backend.studies.sweep_engine import SweepEngine
+from backend.studies.material_ranker import MaterialRanker
+from backend.studies.batch_runner import BatchRunner, export_sweep_to_csv
 
 class StdioServer:
     def __init__(self):
@@ -59,6 +62,48 @@ class StdioServer:
                 
             sys.stdout.write(json.dumps(response) + "\n")
             sys.stdout.flush()
+    def _fetch_study_data(self, conn, explosive_id: int, profile_ids: list) -> tuple:
+        """
+        Shared helper: fetch explosive dict and enriched profiles_data list (with curves)
+        needed by all studies IPC channels.
+
+        Returns:
+            (explosive: dict, profiles_data: list)
+        """
+        cursor = conn.cursor()
+
+        # Fetch explosive
+        cursor.execute("SELECT * FROM explosives WHERE id = ?", (explosive_id,))
+        row = cursor.fetchone()
+        if not row:
+            raise ValueError(f"Explosive id={explosive_id} not found")
+        explosive = dict(row)
+
+        # Fetch profiles + thresholds + curves
+        profiles_data = []
+        for pid in profile_ids:
+            cursor.execute("""
+                SELECT mp.*, mp.name AS profile_name
+                FROM material_profiles mp
+                WHERE mp.id = ?
+            """, (pid,))
+            prof_row = cursor.fetchone()
+            if not prof_row:
+                continue
+            prof = dict(prof_row)
+
+            # Load response curves for this profile
+            cursor.execute("""
+                SELECT damage_state, curve_type, pressure_asymptote,
+                       impulse_asymptote, curve_constant, equation_text,
+                       source_reference, confidence_level
+                FROM material_response_curves
+                WHERE profile_id = ?
+            """, (pid,))
+            prof["curves"] = [dict(r) for r in cursor.fetchall()]
+            profiles_data.append(prof)
+
+        return explosive, profiles_data
 
     def route(self, channel: str, payload: dict):
         """Routes the Electron IPC channel to database queries or calculations."""
@@ -562,6 +607,81 @@ class StdioServer:
                 else:
                     cursor.execute("SELECT * FROM ufc_references")
                 return [dict(row) for row in cursor.fetchall()]
+
+            # ----------------------------------------------------------------
+            # studies:distanceSweep
+            # Payload: {explosive_id, charge_kg, distances_m[], profile_ids[], burst_type?}
+            # ----------------------------------------------------------------
+            elif channel == "studies:distanceSweep":
+                explosive_id = payload["explosive_id"]
+                charge_kg    = float(payload["charge_kg"])
+                distances_m  = [float(d) for d in payload["distances_m"]]
+                profile_ids  = payload["profile_ids"]
+                burst_type   = payload.get("burst_type", "Surface")
+
+                explosive, profiles_data = self._fetch_study_data(conn, explosive_id, profile_ids)
+                return SweepEngine.distance_sweep(explosive, charge_kg, distances_m, profiles_data, burst_type)
+
+            # ----------------------------------------------------------------
+            # studies:chargeSweep
+            # Payload: {explosive_id, charges_kg[], distance_m, profile_ids[], burst_type?}
+            # ----------------------------------------------------------------
+            elif channel == "studies:chargeSweep":
+                explosive_id = payload["explosive_id"]
+                charges_kg   = [float(c) for c in payload["charges_kg"]]
+                distance_m   = float(payload["distance_m"])
+                profile_ids  = payload["profile_ids"]
+                burst_type   = payload.get("burst_type", "Surface")
+
+                explosive, profiles_data = self._fetch_study_data(conn, explosive_id, profile_ids)
+                return SweepEngine.charge_sweep(explosive, charges_kg, distance_m, profiles_data, burst_type)
+
+            # ----------------------------------------------------------------
+            # studies:explosiveComparison
+            # Payload: {explosive_ids[], charge_kg, distances_m[], profile_ids[], burst_type?}
+            # ----------------------------------------------------------------
+            elif channel == "studies:explosiveComparison":
+                explosive_ids = payload["explosive_ids"]
+                charge_kg     = float(payload["charge_kg"])
+                distances_m   = [float(d) for d in payload["distances_m"]]
+                profile_ids   = payload["profile_ids"]
+                burst_type    = payload.get("burst_type", "Surface")
+
+                cursor = conn.cursor()
+                explosives = []
+                for eid in explosive_ids:
+                    cursor.execute("SELECT * FROM explosives WHERE id = ?", (eid,))
+                    row = cursor.fetchone()
+                    if row:
+                        explosives.append(dict(row))
+
+                _, profiles_data = self._fetch_study_data(conn, explosive_ids[0], profile_ids)
+                return SweepEngine.explosive_comparison(explosives, charge_kg, distances_m, profiles_data, burst_type)
+
+            # ----------------------------------------------------------------
+            # studies:runGrid
+            # Payload: {explosive_id, charges_kg[], distances_m[], profile_ids[], burst_type?}
+            # ----------------------------------------------------------------
+            elif channel == "studies:runGrid":
+                explosive_id = payload["explosive_id"]
+                charges_kg   = [float(c) for c in payload["charges_kg"]]
+                distances_m  = [float(d) for d in payload["distances_m"]]
+                profile_ids  = payload["profile_ids"]
+                burst_type   = payload.get("burst_type", "Surface")
+
+                explosive, profiles_data = self._fetch_study_data(conn, explosive_id, profile_ids)
+                result = BatchRunner.run_grid(explosive, charges_kg, distances_m, profiles_data, burst_type)
+                return result
+
+            # ----------------------------------------------------------------
+            # studies:exportCSV
+            # Payload: {sweep_points[], save_path?}
+            # ----------------------------------------------------------------
+            elif channel == "studies:exportCSV":
+                sweep_points = payload["sweep_points"]
+                save_path    = payload.get("save_path")  # None → fallback to Documents
+                written_path = export_sweep_to_csv(sweep_points, save_path)
+                return {"path": written_path, "n_rows": len(sweep_points)}
 
             else:
                 raise ValueError(f"Unknown channel: {channel}")
