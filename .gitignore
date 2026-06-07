@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+dist/
+dist-electron/
+*.egg-info/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.db
+*.db-shm
+*.db-wal
+*.log
+
+# Environment
+.env
+.env.local
+
+# Editor
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.tsbuildinfo
