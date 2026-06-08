@@ -27,3 +27,5 @@ Thumbs.db
 
 # Build artifacts
 *.tsbuildinfo
+dist-package/
+

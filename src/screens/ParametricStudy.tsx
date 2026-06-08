@@ -8,6 +8,8 @@ import RiskContourPanel from '../components/RiskContourPanel';
 interface ParametricStudyProps {
   explosives: Explosive[];
   profiles: MaterialProfile[];
+  gridResult: GridResult | null;
+  setGridResult: (res: GridResult | null) => void;
 }
 
 const STUDY_ICONS: Record<StudyType, React.ReactNode> = {
@@ -45,7 +47,7 @@ function pointCount(studyType: StudyType, distancesM: number[], chargesKg: numbe
   return 0;
 }
 
-export default function ParametricStudy({ explosives, profiles }: ParametricStudyProps) {
+export default function ParametricStudy({ explosives, profiles, gridResult, setGridResult }: ParametricStudyProps) {
   const [studyType, setStudyType] = useState<StudyType>('distance');
   const [explosiveId, setExplosiveId] = useState<number>(explosives[0]?.id ?? 1);
   const [explosiveIds, setExplosiveIds] = useState<number[]>([explosives[0]?.id ?? 1]);
@@ -59,7 +61,6 @@ export default function ParametricStudy({ explosives, profiles }: ParametricStud
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sweepPoints, setSweepPoints] = useState<SweepPoint[]>([]);
-  const [gridResult, setGridResult] = useState<GridResult | null>(null);
   const [confirming, setConfirming] = useState(false);
 
   const chargesKg = parseRange(chargesKgStr);

@@ -170,18 +170,6 @@ CREATE TABLE IF NOT EXISTS validation_cases (
     FOREIGN KEY (model_version_id) REFERENCES model_versions (id) ON DELETE SET NULL
 );
 
--- Research Runs (Parametric Sweep Configurations)
-CREATE TABLE IF NOT EXISTS research_runs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL UNIQUE,
-    base_scenario_id INTEGER NOT NULL,
-    variable_name TEXT NOT NULL,       -- e.g., 'charge_weight', 'distance'
-    min_value REAL NOT NULL,
-    max_value REAL NOT NULL,
-    step_value REAL NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (base_scenario_id) REFERENCES scenarios (id) ON DELETE CASCADE
-);
 
 -- UFC Figure Metadata Table
 CREATE TABLE IF NOT EXISTS ufc_references (

@@ -1,9 +1,11 @@
-import { Flame, ShieldAlert, BarChart3, Database, Clock, TrendingUp, Map } from 'lucide-react';
+import { Flame, ShieldAlert, BarChart3, Database, Clock, TrendingUp, Map, HelpCircle } from 'lucide-react';
 import { Scenario } from '../types';
+import { api } from '../services/api';
+import { useState } from 'react';
 
 interface SidebarProps {
-  currentScreen: 'input' | 'results' | 'assessment' | 'workspace' | 'study' | 'vulnmap';
-  setCurrentScreen: (screen: 'input' | 'results' | 'assessment' | 'workspace' | 'study' | 'vulnmap') => void;
+  currentScreen: 'input' | 'results' | 'assessment' | 'workspace' | 'study' | 'vulnmap' | 'documentation';
+  setCurrentScreen: (screen: 'input' | 'results' | 'assessment' | 'workspace' | 'study' | 'vulnmap' | 'documentation') => void;
   activeScenario: Scenario | null;
   scenarios: Scenario[];
   onSelectScenario: (sc: Scenario) => void;
@@ -16,13 +18,53 @@ export default function Sidebar({
   scenarios,
   onSelectScenario
 }: SidebarProps) {
+  const [dbStatus, setDbStatus] = useState<string | null>(null);
+
+  const handleExportDB = async () => {
+    try {
+      setDbStatus('Exporting...');
+      const res = await api.database.export();
+      if (res.success) {
+        setDbStatus('Exported successfully!');
+      } else if (res.canceled) {
+        setDbStatus(null);
+      } else {
+        setDbStatus(`Error: ${res.error}`);
+      }
+      setTimeout(() => setDbStatus(null), 3000);
+    } catch (e: any) {
+      setDbStatus(`Error: ${e.message}`);
+      setTimeout(() => setDbStatus(null), 3000);
+    }
+  };
+
+  const handleImportDB = async () => {
+    try {
+      setDbStatus('Importing...');
+      const res = await api.database.import();
+      if (res.success) {
+        setDbStatus('Imported! Reloading...');
+        setTimeout(() => window.location.reload(), 1500);
+      } else if (res.canceled) {
+        setDbStatus(null);
+      } else {
+        setDbStatus(`Error: ${res.error}`);
+        setTimeout(() => setDbStatus(null), 3000);
+      }
+    } catch (e: any) {
+      setDbStatus(`Error: ${e.message}`);
+      setTimeout(() => setDbStatus(null), 3000);
+    }
+  };
+
   const navItems = [
-    { id: 'input',      label: 'Scenario Input',      icon: Database,     section: 'core' },
-    { id: 'results',    label: 'Blast Results',        icon: Flame,        section: 'core' },
-    { id: 'assessment', label: 'Material Assessment',  icon: ShieldAlert,  section: 'core' },
-    { id: 'workspace',  label: 'Research Workspace',   icon: BarChart3,    section: 'core' },
-    { id: 'study',      label: 'Parametric Study',     icon: TrendingUp,   section: 'study' },
-    { id: 'vulnmap',    label: 'Vulnerability Map',    icon: Map,          section: 'study' },
+    { id: 'input',          label: 'Scenario Input',          icon: Database,     section: 'core' },
+    { id: 'results',        label: 'Blast Results',            icon: Flame,        section: 'core' },
+    { id: 'assessment',     label: 'Material Assessment',      icon: ShieldAlert,  section: 'core' },
+    { id: 'workspace',      label: 'Research Workspace',       icon: BarChart3,    section: 'core' },
+    { id: 'study',          label: 'Parametric Study',         icon: TrendingUp,   section: 'study' },
+    { id: 'vulnmap',        label: 'Vulnerability Map',        icon: Map,          section: 'study' },
+    { id: 'documentation',  label: 'Documentation',            icon: HelpCircle,   section: 'help' }
   ] as const;
 
   return (
@@ -116,6 +158,31 @@ export default function Sidebar({
             </button>
           );
         })}
+        {/* Help/Doc section */}
+        <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', padding: '10px 14px 6px', opacity: 0.6 }}>Reference & Help</div>
+        {navItems.filter(i => i.section === 'help').map((item) => {
+          const Icon = item.icon;
+          const isActive = currentScreen === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => setCurrentScreen(item.id)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '12px',
+                width: '100%', padding: '10px 14px', borderRadius: '8px',
+                border: 'none',
+                background: isActive ? 'rgba(99, 102, 241, 0.12)' : 'transparent',
+                color: isActive ? '#818cf8' : 'var(--text-muted)',
+                fontWeight: isActive ? 600 : 500, fontSize: '0.9rem',
+                cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s',
+                borderLeft: isActive ? '2px solid var(--accent)' : '2px solid transparent',
+              }}
+            >
+              <Icon size={17} />
+              {item.label}
+            </button>
+          );
+        })}
       </nav>
 
       {/* Saved Scenarios List */}
@@ -183,6 +250,42 @@ export default function Sidebar({
             );
           })}
         </div>
+      </div>
+
+      {/* Database Actions Footer */}
+      <div style={{
+        padding: '16px 20px',
+        borderTop: '1px solid var(--border-color)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px'
+      }}>
+        <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', opacity: 0.6 }}>
+          Database Settings
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+          <button
+            onClick={handleExportDB}
+            className="btn btn-secondary"
+            style={{ fontSize: '0.75rem', padding: '6px 8px', justifyContent: 'center' }}
+            title="Export runtime database backup"
+          >
+            Export DB
+          </button>
+          <button
+            onClick={handleImportDB}
+            className="btn btn-secondary"
+            style={{ fontSize: '0.75rem', padding: '6px 8px', justifyContent: 'center' }}
+            title="Import/Replace database file"
+          >
+            Import DB
+          </button>
+        </div>
+        {dbStatus && (
+          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '4px' }}>
+            {dbStatus}
+          </div>
+        )}
       </div>
     </aside>
   );

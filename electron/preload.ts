@@ -11,13 +11,23 @@ contextBridge.exposeInMainWorld('api', {
       'scenarios:listNotes',
       'explosives:list',
       'materials:listProfiles',
+      'materials:getPIEnvelopes',
       'blast:calculateEnvironment',
       'material:assessBatch',
       'research:parametricSweep',
       'research:compareScenarios',
       'units:list',
       'units:convert',
-      'ufc:search'
+      'ufc:search',
+      'validation:runSweep',
+      'validation:getSummary',
+      'studies:distanceSweep',
+      'studies:chargeSweep',
+      'studies:explosiveComparison',
+      'studies:runGrid',
+      'studies:exportCSV',
+      'database:export',
+      'database:import'
     ];
     
     if (validChannels.includes(channel)) {

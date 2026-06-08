@@ -14,13 +14,19 @@ interface ResearchWorkspaceProps {
   activeResults: BlastResults | null;
   profiles: MaterialProfile[];
   assessments: DamageAssessment[];
+  validationSummary: ValidationSummary[];
+  validationCases: ValidationCase[];
+  onReloadValidation: () => Promise<void>;
 }
 
 export default function ResearchWorkspace({
   activeScenario,
   activeResults,
   profiles,
-  assessments
+  assessments,
+  validationSummary,
+  validationCases,
+  onReloadValidation
 }: ResearchWorkspaceProps) {
   const [activeTab, setActiveTab] = useState<'analysis' | 'comparison' | 'parametric' | 'vulnerability' | 'radar' | 'validation'>('analysis');
   
@@ -46,8 +52,6 @@ export default function ResearchWorkspace({
   const [selectedProfiles, setSelectedProfiles] = useState<number[]>([]);
 
   // Validation States
-  const [validationSummary, setValidationSummary] = useState<ValidationSummary[]>([]);
-  const [validationCases, setValidationCases] = useState<ValidationCase[]>([]);
   const [sourceDist, setSourceDist] = useState<Array<{ source: string; cases: number }>>([]);
   const [isValidating, setIsValidating] = useState(false);
 
@@ -129,35 +133,55 @@ export default function ResearchWorkspace({
     }
   };
 
-  // 5. Load Validation data
+  // Derive source distributions from validation cases prop
   useEffect(() => {
-    if (activeTab === 'validation') {
-      loadValidationData();
-    }
-  }, [activeTab]);
-
-  const loadValidationData = async () => {
-    try {
-      setIsValidating(true);
-      const cases = await api.validation.runSweep();
-      setValidationCases(cases);
-      const summary = await api.validation.getSummary();
-      setValidationSummary(summary);
-      
+    if (validationCases.length > 0) {
       const counts: Record<string, number> = {};
-      cases.forEach((c) => {
+      validationCases.forEach((c) => {
         counts[c.validation_source] = (counts[c.validation_source] || 0) + 1;
       });
       const dist = Object.keys(counts)
         .map((k) => ({ source: k, cases: counts[k] }))
         .sort((a, b) => b.cases - a.cases);
       setSourceDist(dist);
-      
-      setIsValidating(false);
+    }
+  }, [validationCases]);
+
+  const loadValidationData = async () => {
+    try {
+      setIsValidating(true);
+      await onReloadValidation();
     } catch (e) {
-      console.error('Validation error:', e);
+      console.error('Validation reload error:', e);
+    } finally {
       setIsValidating(false);
     }
+  };
+
+  const handleExportValidation = () => {
+    if (!validationCases.length) return;
+    const headers = [
+      'validation_source', 'validation_page', 'burst_type', 'ground_truth_class', 
+      'charge_weight', 'distance', 'scaled_distance', 'reference_pressure', 
+      'calculated_pressure', 'pressure_rel_error', 'reference_impulse', 
+      'calculated_impulse', 'impulse_rel_error'
+    ];
+    const csvContent = [
+      headers.join(','),
+      ...validationCases.map(c => headers.map(h => {
+        const val = (c as any)[h];
+        return typeof val === 'string' && val.includes(',') ? `"${val}"` : (val ?? '');
+      }).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'blastscope_validation_cases.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const toggleScenarioSelection = (id: number) => {
@@ -465,15 +489,24 @@ export default function ResearchWorkspace({
               <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <h3 style={{ fontSize: '1rem', color: '#fff', margin: 0 }}>Model Accuracy Benchmark Dashboard</h3>
-                  <button 
-                    className="btn btn-secondary" 
-                    onClick={loadValidationData} 
-                    disabled={isValidating}
-                    style={{ padding: '6px 12px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '6px' }}
-                  >
-                    <RefreshCw size={12} className={isValidating ? 'animate-spin' : ''} />
-                    {isValidating ? 'Recalculating...' : 'Refresh Benchmark'}
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button 
+                      className="btn btn-secondary" 
+                      onClick={handleExportValidation}
+                      style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                    >
+                      Export Verification Dataset
+                    </button>
+                    <button 
+                      className="btn btn-secondary" 
+                      onClick={loadValidationData} 
+                      disabled={isValidating}
+                      style={{ padding: '6px 12px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <RefreshCw size={12} className={isValidating ? 'animate-spin' : ''} />
+                      {isValidating ? 'Recalculating...' : 'Refresh Benchmark'}
+                    </button>
+                  </div>
                 </div>
                 
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>

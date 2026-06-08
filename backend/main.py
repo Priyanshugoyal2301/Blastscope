@@ -335,16 +335,6 @@ class StdioServer:
                 
                 return summary
 
-            elif channel == "validation:getSourceDistribution":
-                cursor = conn.cursor()
-                cursor.execute("""
-                    SELECT validation_source as source, COUNT(*) as cases
-                    FROM validation_cases
-                    WHERE pressure_rel_error IS NOT NULL
-                    GROUP BY validation_source
-                    ORDER BY cases DESC
-                """)
-                return [dict(row) for row in cursor.fetchall()]
 
             elif channel == "scenarios:saveNote":
                 cursor = conn.cursor()

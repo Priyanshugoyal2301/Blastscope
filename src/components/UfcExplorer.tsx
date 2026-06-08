@@ -11,6 +11,22 @@ interface UfcExplorerProps {
 export default function UfcExplorer({ isOpen, onClose }: UfcExplorerProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<UfcReference[]>([]);
+  const [copiedId, setCopiedId] = useState<number | null>(null);
+
+  const copyCitation = (ref: UfcReference, format: 'APA' | 'IEEE' | 'Chicago') => {
+    let citation = '';
+    if (format === 'APA') {
+      citation = `Department of Defense. (2008). Unified Facilities Criteria: Structures to Resist the Effects of Accidental Explosions (UFC 3-340-02). Washington, DC: Department of Defense. (Figure: ${ref.figure_number}, p. ${ref.source_page}).`;
+    } else if (format === 'IEEE') {
+      citation = `Unified Facilities Criteria: Structures to Resist the Effects of Accidental Explosions, UFC 3-340-02, Dept. of Defense, Washington, DC, 2008, Fig. ${ref.figure_number}, p. ${ref.source_page}.`;
+    } else {
+      // Chicago
+      citation = `U.S. Department of Defense. Unified Facilities Criteria: Structures to Resist the Effects of Accidental Explosions (UFC 3-340-02). Washington, DC: Department of Defense, 2008. Figure ${ref.figure_number}, page ${ref.source_page}.`;
+    }
+    navigator.clipboard.writeText(citation);
+    setCopiedId(ref.id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   useEffect(() => {
     async function fetchReferences() {
@@ -128,6 +144,25 @@ export default function UfcExplorer({ isOpen, onClose }: UfcExplorerProps) {
                   ))}
                 </div>
               )}
+
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '8px', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Copy Citation:</span>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  {['APA', 'IEEE', 'Chicago'].map((format) => (
+                    <button
+                      key={format}
+                      onClick={() => copyCitation(ref, format as any)}
+                      style={{
+                        padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border-color)',
+                        background: 'rgba(255,255,255,0.03)', color: 'var(--text-main)', fontSize: '0.65rem',
+                        cursor: 'pointer', transition: 'all 0.15s'
+                      }}
+                    >
+                      {copiedId === ref.id ? 'Copied!' : format}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           ))
         )}

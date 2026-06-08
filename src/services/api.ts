@@ -675,4 +675,19 @@ export const api = {
       return Promise.resolve({ path: 'browser-download', n_rows: sweep_points.length });
     },
   },
+  database: {
+    async export(): Promise<{ success: boolean; filePath?: string; error?: string; canceled?: boolean }> {
+      if (isElectron) {
+        return window.api!.invoke('database:export');
+      }
+      return Promise.resolve({ success: false, error: 'Database export is only supported in native desktop mode.' });
+    },
+    async import(): Promise<{ success: boolean; filePath?: string; error?: string; canceled?: boolean }> {
+      if (isElectron) {
+        return window.api!.invoke('database:import');
+      }
+      return Promise.resolve({ success: false, error: 'Database import is only supported in native desktop mode.' });
+    }
+  }
 };
+

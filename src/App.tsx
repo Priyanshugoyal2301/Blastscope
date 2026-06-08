@@ -7,12 +7,14 @@ import MaterialAssessmentScreen from './screens/MaterialAssessment';
 import ResearchWorkspace from './screens/ResearchWorkspace';
 import ParametricStudy from './screens/ParametricStudy';
 import VulnerabilityMap from './screens/VulnerabilityMap';
+import Documentation from './screens/Documentation';
+import ReportGenerator from './components/ReportGenerator';
 import { api } from './services/api';
-import { Scenario, Explosive, MaterialProfile, BlastResults, DamageAssessment, GridResult } from './types';
+import { Scenario, Explosive, MaterialProfile, BlastResults, DamageAssessment, GridResult, ValidationCase, ValidationSummary } from './types';
 import { BookOpen } from 'lucide-react';
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState<'input' | 'results' | 'assessment' | 'workspace' | 'study' | 'vulnmap'>('input');
+  const [currentScreen, setCurrentScreen] = useState<'input' | 'results' | 'assessment' | 'workspace' | 'study' | 'vulnmap' | 'documentation'>('input');
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [explosives, setExplosives] = useState<Explosive[]>([]);
   const [profiles, setProfiles] = useState<MaterialProfile[]>([]);
@@ -21,7 +23,8 @@ export default function App() {
   const [activeResults, setActiveResults] = useState<BlastResults | null>(null);
   const [activeAssessments, setActiveAssessments] = useState<DamageAssessment[]>([]);
   const [gridResult, setGridResult] = useState<GridResult | null>(null);
-  void setGridResult; // will be wired when ParametricStudy emits a GridResult
+  const [validationSummary, setValidationSummary] = useState<ValidationSummary[]>([]);
+  const [validationCases, setValidationCases] = useState<ValidationCase[]>([]);
   const [isUfcOpen, setIsUfcOpen] = useState(false);
 
   // Load baseline seeds on startup
@@ -36,6 +39,12 @@ export default function App() {
         
         const profList = await api.materials.listProfiles();
         setProfiles(profList);
+
+        // Fetch validation benchmarks on startup
+        const vCases = await api.validation.runSweep();
+        setValidationCases(vCases);
+        const vSum = await api.validation.getSummary();
+        setValidationSummary(vSum);
 
         if (scList.length > 0) {
           handleSelectScenario(scList[0]);
@@ -144,6 +153,14 @@ export default function App() {
               activeResults={activeResults}
               profiles={profiles}
               assessments={activeAssessments}
+              validationSummary={validationSummary}
+              validationCases={validationCases}
+              onReloadValidation={async () => {
+                const vCases = await api.validation.runSweep();
+                setValidationCases(vCases);
+                const vSum = await api.validation.getSummary();
+                setValidationSummary(vSum);
+              }}
             />
           )}
 
@@ -151,6 +168,8 @@ export default function App() {
             <ParametricStudy
               explosives={explosives}
               profiles={profiles}
+              gridResult={gridResult}
+              setGridResult={setGridResult}
             />
           )}
 
@@ -160,11 +179,24 @@ export default function App() {
               profiles={profiles}
             />
           )}
+
+          {currentScreen === 'documentation' && (
+            <Documentation />
+          )}
         </div>
       </main>
 
       {/* UFC Explorer Sliding Panel */}
       <UfcExplorer isOpen={isUfcOpen} onClose={() => setIsUfcOpen(false)} />
+
+      {/* Hidden Print Report Container */}
+      <ReportGenerator 
+        scenario={activeScenario}
+        results={activeResults}
+        assessments={activeAssessments}
+        validationSummary={validationSummary}
+        validationCases={validationCases}
+      />
     </div>
   );
 }

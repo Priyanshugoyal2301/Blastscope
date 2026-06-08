@@ -187,3 +187,49 @@ h1, h2, h3, h4, h5, h6 {
 .animate-fade-in {
   opacity: 1;
 }
+
+/* Print Stylesheet for PDF Report Generation */
+@media print {
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    overflow: visible !important;
+    height: auto !important;
+    width: auto !important;
+  }
+  
+  /* Hide standard UI elements */
+  .app-container,
+  .main-content,
+  .scrollable-view,
+  header,
+  .sidebar,
+  .btn,
+  button,
+  .sidebar-container,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Show and format print report container */
+  #print-report {
+    display: block !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 30px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Force print background colors */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+#print-report {
+  display: none;
+}
+

@@ -38,7 +38,7 @@ export default function ExportMenu() {
 
           <button 
             className="btn btn-primary" 
-            onClick={() => triggerExport('PDF')}
+            onClick={() => window.print()}
             style={{ fontSize: '0.8rem', padding: '6px 12px' }}
           >
             <FileText size={14} />

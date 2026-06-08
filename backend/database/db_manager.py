@@ -1,11 +1,33 @@
 import os
 import sqlite3
 
-DEFAULT_DB_PATH = os.path.join(os.path.dirname(__file__), "sqlite.db")
+def get_default_db_path():
+    is_packaged = os.environ.get("BLASTSCOPE_PACKAGED") == "1"
+    appdata = os.environ.get("APPDATA")
+    if is_packaged and appdata:
+        base_dir = os.path.join(appdata, "BlastScope")
+        return os.path.join(base_dir, "sqlite.db")
+    elif appdata and not os.path.exists(os.path.join(os.path.dirname(__file__), "schema.sql")):
+        # Fallback if source files aren't in path (packaged layout)
+        base_dir = os.path.join(appdata, "BlastScope")
+        return os.path.join(base_dir, "sqlite.db")
+    return os.path.join(os.path.dirname(__file__), "sqlite.db")
+
+DEFAULT_DB_PATH = get_default_db_path()
 SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "schema.sql")
+if not os.path.exists(SCHEMA_PATH):
+    # If not in source folder, resolve relative to executable or current directory resources
+    SCHEMA_PATH = os.path.join(os.path.dirname(DEFAULT_DB_PATH), "schema.sql")
+    if not os.path.exists(SCHEMA_PATH):
+        # Package fallback
+        SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "schema.sql")
 
 class DatabaseManager:
-    def __init__(self, db_path=None, force_rebuild=True):
+    def __init__(self, db_path=None, force_rebuild=None):
+        if force_rebuild is None:
+            # Rebuild by default in dev, but NOT in packaged production
+            force_rebuild = os.environ.get("BLASTSCOPE_PACKAGED") != "1"
+            
         self.db_path = db_path or DEFAULT_DB_PATH
         db_dir = os.path.dirname(self.db_path)
         if db_dir and not os.path.exists(db_dir):
