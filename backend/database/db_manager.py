@@ -3,6 +3,10 @@ import sqlite3
 
 def get_default_db_path():
     is_packaged = os.environ.get("BLASTSCOPE_PACKAGED") == "1"
+    user_data = os.environ.get("BLASTSCOPE_USER_DATA_DIR")
+    if user_data:
+        return os.path.join(user_data, "sqlite.db")
+        
     appdata = os.environ.get("APPDATA")
     if is_packaged and appdata:
         base_dir = os.path.join(appdata, "BlastScope")
@@ -43,23 +47,184 @@ class DatabaseManager:
         self.init_db()
 
     def get_connection(self):
-        conn = sqlite3.connect(self.db_path)
+        conn = sqlite3.connect(self.db_path, timeout=30.0)
         conn.row_factory = sqlite3.Row
+        try:
+            conn.execute("PRAGMA journal_mode=WAL")
+        except sqlite3.OperationalError:
+            pass
+        except Exception as e:
+            conn.close()
+            raise e
         return conn
 
-    def init_db(self):
-        """Creates tables if they do not exist and runs migrations/seeds."""
-        if not os.path.exists(SCHEMA_PATH):
-            raise FileNotFoundError(f"Schema file not found at {SCHEMA_PATH}")
+    def backup_database(self):
+        """Creates a timestamped backup of the current database file."""
+        import shutil
+        from datetime import datetime
+        
+        db_dir = os.path.dirname(self.db_path)
+        backup_dir = os.path.join(db_dir, "backups")
+        if not os.path.exists(backup_dir):
+            try:
+                os.makedirs(backup_dir)
+            except Exception as e:
+                print(f"Warning: Could not create backups directory: {e}")
+                return None
             
-        with open(SCHEMA_PATH, "r") as f:
-            schema_script = f.read()
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup_path = os.path.join(backup_dir, f"sqlite_backup_{timestamp}.db")
+        
+        try:
+            shutil.copy2(self.db_path, backup_path)
+            print(f"Database backed up successfully to: {backup_path}")
+            return backup_path
+        except Exception as e:
+            print(f"Warning: Could not backup database: {e}")
+            return None
 
+    def run_migrations(self):
+        """
+        Runs SQL migrations sequentially and maintains migration_history.
+        Creates automatic backup before executing migration if database file already exists.
+        """
+        import glob
+        
+        conn = self.get_connection()
+        backup_path = None
+        try:
+            cursor = conn.cursor()
+            
+            # Check if migration_history exists
+            cursor.execute("""
+                SELECT name FROM sqlite_master 
+                WHERE type='table' AND name='migration_history'
+            """)
+            has_history = cursor.fetchone() is not None
+            
+            if not has_history:
+                # If table doesn't exist, we start at version 0
+                cursor.execute("""
+                    SELECT name FROM sqlite_master 
+                    WHERE type='table' AND name='scenarios'
+                """)
+                has_scenarios = cursor.fetchone() is not None
+                
+                with conn:
+                    conn.execute("""
+                        CREATE TABLE IF NOT EXISTS migration_history (
+                            version INTEGER PRIMARY KEY,
+                            applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        )
+                    """)
+                
+                # If it's a completely fresh DB (no tables), starting version is 0.
+                # If scenarios exists but no migration_history, it's an old DB (pre-migration)
+                current_version = 0
+            else:
+                cursor.execute("SELECT MAX(version) FROM migration_history")
+                row = cursor.fetchone()
+                current_version = row[0] if (row and row[0] is not None) else 0
+
+            migrations_dir = os.path.join(os.path.dirname(__file__), "migrations")
+            target_version = 5
+            
+            if current_version < target_version:
+                print(f"Database migration needed: Current version={current_version}, Target version={target_version}")
+                
+                # Only backup if DB file exists and version > 0
+                if os.path.exists(self.db_path) and current_version > 0:
+                    backup_path = self.backup_database()
+
+                for v in range(current_version + 1, target_version + 1):
+                    migration_pattern = os.path.join(migrations_dir, f"{v:03d}_*.sql")
+                    files = glob.glob(migration_pattern)
+                    if not files:
+                        raise FileNotFoundError(f"Migration file for version {v} not found matching pattern {migration_pattern}")
+                    
+                    filepath = files[0]
+                    print(f"Applying migration version {v}: {os.path.basename(filepath)}")
+                    
+                    with open(filepath, "r") as f:
+                        sql_script = f.read()
+                    
+                    with conn:
+                        conn.executescript(sql_script)
+                        conn.execute("INSERT INTO migration_history (version) VALUES (?)", (v,))
+                        
+                print("All migrations successfully applied.")
+            else:
+                print(f"Database is up to date (version {current_version}).")
+        except Exception as e:
+            print(f"ERROR executing migrations: {e}")
+            # Non-destructive rollback failsafe: close connection to unlock file, restore backup, and re-raise.
+            try:
+                conn.close()
+            except Exception:
+                pass
+            if backup_path and os.path.exists(backup_path):
+                import shutil
+                try:
+                    shutil.copy2(backup_path, self.db_path)
+                    print(f"Database rolled back to pre-migration state: {backup_path}")
+                except Exception as restore_err:
+                    print(f"CRITICAL: Failed to restore backup database: {restore_err}")
+            raise e
+        finally:
+            try:
+                conn.close()
+            except Exception:
+                pass
+
+    def init_db(self):
+        """Creates tables using the migration framework and seeds if new."""
+        import sys
+        # 1. Run migrations to build/upgrade database
+        try:
+            self.run_migrations()
+        except Exception as e:
+            print(f"DATABASE CORRUPTION DETECTED during migration: {e}")
+            if self.db_path != ":memory:" and os.path.exists(self.db_path):
+                import shutil
+                from datetime import datetime
+                db_dir = os.path.dirname(self.db_path)
+                backup_dir = os.path.join(db_dir, "backups")
+                if not os.path.exists(backup_dir):
+                    try:
+                        os.makedirs(backup_dir)
+                    except Exception:
+                        pass
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                corrupted_backup_path = os.path.join(backup_dir, f"sqlite_corrupted_{timestamp}.db")
+                try:
+                    shutil.copy2(self.db_path, corrupted_backup_path)
+                    print(f"Corrupted database backed up to: {corrupted_backup_path}")
+                except Exception as backup_err:
+                    print(f"Warning: Could not backup corrupted database: {backup_err}")
+                
+                # Notify on stderr for Electron/logger
+                sys.stderr.write(f"CRITICAL: Database at {self.db_path} is corrupted. Recreating clean database.\n")
+                sys.stderr.flush()
+                
+                try:
+                    os.remove(self.db_path)
+                except Exception as remove_err:
+                    print(f"Warning: Could not remove corrupted database file: {remove_err}")
+                
+                # Try running migrations again on a fresh DB
+                self.run_migrations()
+            else:
+                raise e
+        
+        # 2. Seed default data if explosives table is empty
         conn = self.get_connection()
         try:
-            with conn:
-                conn.executescript(schema_script)
-            self._seed_default_data(conn)
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM explosives")
+            has_data = cursor.fetchone()[0] > 0
+            if not has_data:
+                print("Database explosives table is empty. Seeding default data...")
+                self._seed_default_data(conn)
         finally:
             conn.close()
 
@@ -112,7 +277,8 @@ class DatabaseManager:
                 ("Blast Glazing Design and Assessment Criteria", "Meyland & Nielsen", 2020, "10.1016/j.engstruct.2020.111111", "https://doi.org/", "Research paper defining P-I boundaries for glazing."),
                 ("ISO 16933:2007 Glass in Building -- Explosion-Resistant Security Glazing", "ISO TC 160/SC 1", 2007, "N/A", "https://www.iso.org/standard/39294.html", "Glazing classifications arena air-blast loading."),
                 ("Blast Performance of Concrete Masonry Unit (CMU) Walls", "Talbott et al.", 2004, "N/A", "https://engineering.purdue.edu/", "Structural engineering report on CMU wall failure thresholds."),
-                ("Numerical and Theoretical Study of Concrete Spall Damage under Blast Loads", "Wang et al.", 2014, "N/A", "https://www.researchgate.net/", "Stress wave reflection analysis for concrete targets.")
+                ("Numerical and Theoretical Study of Concrete Spall Damage under Blast Loads", "Wang et al.", 2014, "N/A", "https://www.researchgate.net/", "Stress wave reflection analysis for concrete targets."),
+                ("Glasstone & Dolan: The Effects of Nuclear Weapons", "Samuel Glasstone & Philip J. Dolan", 1977, "N/A", "https://www.atomicarchive.com/resources/documents/effects/", "Standard reference for nuclear and thermal blast effects including human vulnerability.")
             ]
             cursor.executemany(
                 "INSERT INTO sources (title, authors, year, doi, url, notes) VALUES (?, ?, ?, ?, ?, ?)",
@@ -126,7 +292,8 @@ class DatabaseManager:
                 ("Glass",),
                 ("Masonry",),
                 ("Concrete",),
-                ("Steel",)
+                ("Steel",),
+                ("Human",)
             ]
             cursor.executemany(
                 "INSERT INTO materials (family) VALUES (?)",
@@ -146,7 +313,8 @@ class DatabaseManager:
                 (mat_map["Masonry"], "Brick Masonry Unreinforced", 2000.0, 15.0, 0.5, "Flexural Collapse", 1.2, "Brittle", "Three-Hinge Collapse", "Traditional unreinforced masonry wall facade."),
                 (mat_map["Concrete"], "Reinforced Concrete M30", 2400.0, 30.0, 3.5, "Flexure/Spalling", 1.25, "Quasi-brittle", "Spalling", "Standard reinforced structural concrete slab."),
                 (mat_map["Concrete"], "Ultra-High Performance Concrete (UHPC)", 2600.0, 150.0, 12.0, "Localized Shear", 1.3, "Fiber-Reinforced Quasi-Brittle", "Fiber Pullout", "Premium steel micro-fiber concrete panel."),
-                (mat_map["Steel"], "Structural Steel Grade 250", 7850.0, 250.0, 250.0, "Plastic Yielding", 1.4, "Ductile", "Plastic Yielding", "Ductile structural steel column profile.")
+                (mat_map["Steel"], "Structural Steel Grade 250", 7850.0, 250.0, 250.0, "Plastic Yielding", 1.4, "Ductile", "Plastic Yielding", "Ductile structural steel column profile."),
+                (mat_map["Human"], "Human Vulnerability", 1000.0, 0.0, 0.0, "Blast Injury", 1.0, "Biological", "Primary blast trauma", "Human physiological injury thresholds under blast loading.")
             ]
             cursor.executemany(
                 """INSERT INTO material_profiles 
@@ -184,7 +352,10 @@ class DatabaseManager:
                  600.0, 800.0, 2500.0, 2000.0, 6000.0, 5000.0, 8000.0, 8000.0, "Medium", "Fiber pullout / shear crack", "Experimental", "High-strength fiber-reinforced concrete columns"),
                 # Steel Grade 250
                 (prof_map["Structural Steel Grade 250"], src_map["UFC 3-340-02: Structures to Resist the Effects of Accidental Explosions"], 
-                 150.0, 400.0, 800.0, 1200.0, 3500.0, 3000.0, 5000.0, 4000.0, "High", "Boundary tearing / plastic yield", "Analytical", "Ductile steel plates and boundary joints")
+                 150.0, 400.0, 800.0, 1200.0, 3500.0, 3000.0, 5000.0, 4000.0, "High", "Boundary tearing / plastic yield", "Analytical", "Ductile steel plates and boundary joints"),
+                # Human Vulnerability
+                (prof_map["Human Vulnerability"], src_map["Glasstone & Dolan: The Effects of Nuclear Weapons"], 
+                 34.0, 80.0, 100.0, 180.0, 240.0, 380.0, 340.0, 600.0, "Medium", "Eardrum rupture / lung damage / lethality", "Analytical", "Human body physiological response to free-field overpressure")
             ]
             cursor.executemany(
                 """INSERT INTO thresholds 
@@ -261,7 +432,11 @@ class DatabaseManager:
                 (50.0, 8.0, "TNT", "Free Air", 2.17, 133.1, 69.9, "ConWep Example", "Table 4-1", "Analytical", "ConWep", mv_id),
                 (100.0, 12.0, "TNT", "Free Air", 2.58, 88.9, 59.7, "ConWep Example", "Table 4-1", "Analytical", "ConWep", mv_id),
                 (10.0, 2.5, "TNT", "Free Air", 1.16, 519.1, 126.5, "NSWC Field Test", "Report 94-2", "Experimental", "Experimental", mv_id),
-                (50.0, 5.0, "TNT", "Free Air", 1.36, 368.1, 108.1, "NSWC Field Test", "Report 94-2", "Experimental", "Experimental", mv_id)
+                (50.0, 5.0, "TNT", "Free Air", 1.36, 368.1, 108.1, "NSWC Field Test", "Report 94-2", "Experimental", "Experimental", mv_id),
+                
+                (10.0, 5.0, "C4", "Surface", 2.09, 256.6, 123.5, "ConWep", "Non-TNT Verification", "Analytical", "ConWep", mv_id),
+                (100.0, 10.0, "ANFO", "Surface", 2.30, 207.1, 121.0, "ConWep", "Non-TNT Verification", "Analytical", "ConWep", mv_id),
+                (20.0, 6.0, "RDX", "Free Air", 2.12, 138.4, 70.4, "ConWep", "Non-TNT Verification", "Analytical", "ConWep", mv_id)
             ]
             
             cursor.executemany(

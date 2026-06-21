@@ -54,7 +54,7 @@ export default function UfcExplorer({ isOpen, onClose }: UfcExplorerProps) {
       height: '100vh',
       background: 'var(--bg-sidebar)',
       borderLeft: '1px solid var(--border-color)',
-      boxShadow: '-10px 0 30px rgba(0,0,0,0.5)',
+      boxShadow: '-10px 0 30px rgba(0,0,0,0.1)',
       display: 'flex',
       flexDirection: 'column',
       zIndex: 100,
@@ -70,7 +70,7 @@ export default function UfcExplorer({ isOpen, onClose }: UfcExplorerProps) {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Book size={20} className="text-primary" style={{ color: 'var(--primary)' }} />
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff' }}>UFC Explorer</h2>
+          <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)' }}>UFC Explorer</h2>
         </div>
         <button 
           onClick={onClose}
@@ -84,7 +84,7 @@ export default function UfcExplorer({ isOpen, onClose }: UfcExplorerProps) {
       <div style={{ padding: '16px', borderBottom: '1px solid var(--border-color)' }}>
         <div style={{ position: 'relative' }}>
           <input
-            type="text"
+             type="text"
             className="form-input"
             placeholder="Search UFC Chapter 2 (e.g. Figure 2-7, surface)..."
             value={query}
@@ -106,7 +106,7 @@ export default function UfcExplorer({ isOpen, onClose }: UfcExplorerProps) {
             <div 
               key={ref.id} 
               className="glass-panel" 
-              style={{ padding: '16px', background: 'rgba(255,255,255,0.02)', display: 'flex', flexDirection: 'column', gap: '8px' }}
+              style={{ padding: '16px', background: 'rgba(0,0,0,0.01)', display: 'flex', flexDirection: 'column', gap: '8px' }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className="badge badge-minor" style={{ fontSize: '0.65rem' }}>
@@ -118,7 +118,7 @@ export default function UfcExplorer({ isOpen, onClose }: UfcExplorerProps) {
                 </span>
               </div>
               
-              <h3 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#fff', marginTop: '4px' }}>
+              <h3 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-main)', marginTop: '4px' }}>
                 {ref.title}
               </h3>
               
@@ -135,7 +135,7 @@ export default function UfcExplorer({ isOpen, onClose }: UfcExplorerProps) {
                         fontSize: '0.62rem', 
                         padding: '2px 6px', 
                         borderRadius: '4px', 
-                        background: 'rgba(255,255,255,0.05)', 
+                        background: 'rgba(0,0,0,0.04)', 
                         color: 'var(--text-muted)' 
                       }}
                     >
@@ -145,7 +145,7 @@ export default function UfcExplorer({ isOpen, onClose }: UfcExplorerProps) {
                 </div>
               )}
 
-              <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '8px', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '8px', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Copy Citation:</span>
                 <div style={{ display: 'flex', gap: '6px' }}>
                   {['APA', 'IEEE', 'Chicago'].map((format) => (
@@ -154,7 +154,7 @@ export default function UfcExplorer({ isOpen, onClose }: UfcExplorerProps) {
                       onClick={() => copyCitation(ref, format as any)}
                       style={{
                         padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border-color)',
-                        background: 'rgba(255,255,255,0.03)', color: 'var(--text-main)', fontSize: '0.65rem',
+                        background: 'rgba(0,0,0,0.02)', color: 'var(--text-main)', fontSize: '0.65rem',
                         cursor: 'pointer', transition: 'all 0.15s'
                       }}
                     >

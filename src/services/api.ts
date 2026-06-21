@@ -52,63 +52,283 @@ const mockValidationCases: ValidationCase[] = [
   { id: 5, charge_weight: 10.0, distance: 2.0, explosive_name: "TNT", burst_type: "Surface", scaled_distance: 0.93, reference_pressure: 1680.0, reference_impulse: 380.0, validation_source: "NSWC Field Test", validation_page: "Report 94-1", reference_type: "Experimental", ground_truth_class: "Experimental" }
 ];
 
-// Physics simulation matching dual TNT math
+interface CoeffRange {
+  min: number;
+  max: number;
+  coeffs: number[];
+}
+
+const SURFACE_INCIDENT_PRESSURE: CoeffRange[] = [
+  { min: 0.20, max: 2.90, coeffs: [7.2106, -2.1069, -0.3229, 0.1117, 0.0685, 0.0, 0.0] },
+  { min: 2.90, max: 23.80, coeffs: [7.5938, -3.0523, 0.40977, 0.0261, -0.01267, 0.0, 0.0] },
+  { min: 23.80, max: 198.5, coeffs: [6.0536, -1.4066, 0.0, 0.0, 0.0, 0.0, 0.0] }
+];
+
+const SURFACE_REFLECTED_PRESSURE: CoeffRange[] = [
+  { min: 0.06, max: 2.00, coeffs: [9.0060, -2.6893, -0.6295, 0.1011, 0.29255, 0.13505, 0.019736] },
+  { min: 2.00, max: 40.00, coeffs: [8.8396, -1.7330, -2.6400, 2.2930, -0.8232, 0.14247, -0.0099] }
+];
+
+const SURFACE_INCIDENT_IMPULSE: CoeffRange[] = [
+  { min: 0.20, max: 0.96, coeffs: [5.5220, 1.1170, 0.6000, -0.2920, -0.0870, 0.0, 0.0] },
+  { min: 0.96, max: 2.38, coeffs: [5.4650, -0.3080, -1.4640, 1.3620, -0.4320, 0.0, 0.0] },
+  { min: 2.38, max: 33.70, coeffs: [5.2749, -0.4677, -0.2499, 0.0588, -0.00554, 0.0, 0.0] },
+  { min: 33.70, max: 158.7, coeffs: [5.9825, -1.0620, 0.0, 0.0, 0.0, 0.0, 0.0] }
+];
+
+const SURFACE_REFLECTED_IMPULSE: CoeffRange[] = [
+  { min: 0.06, max: 40.00, coeffs: [6.7853, -1.3466, 0.1010, -0.01123, 0.0, 0.0, 0.0] }
+];
+
+const SURFACE_ARRIVAL_TIME: CoeffRange[] = [
+  { min: 0.06, max: 1.50, coeffs: [-0.7604, 1.8058, 0.1257, -0.0437, -0.0310, -0.00669, 0.0] },
+  { min: 1.50, max: 40.00, coeffs: [-0.7137, 1.5732, 0.5561, -0.4213, 0.1054, -0.00929, 0.0] }
+];
+
+const SURFACE_POSITIVE_DURATION: CoeffRange[] = [
+  { min: 0.20, max: 1.02, coeffs: [0.5426, 3.2299, -1.5931, -5.9667, -4.0815, -0.9149, 0.0] },
+  { min: 1.02, max: 2.80, coeffs: [0.5440, 2.7082, -9.7354, 14.3425, -9.7791, 2.8535, 0.0] },
+  { min: 2.80, max: 40.00, coeffs: [-2.4608, 7.1639, -5.6215, 2.2711, -0.44994, 0.03486, 0.0] }
+];
+
+const SPHERICAL_INCIDENT_PRESSURE: CoeffRange[] = [
+  { min: 0.148, max: 2.90, coeffs: [6.56473, -2.06707, -0.28669, 0.13897, 0.08131, 0.0, 0.0] },
+  { min: 2.90, max: 23.80, coeffs: [3.61594, 4.48734, -5.46266, 2.02546, -0.26044, 0.0, 0.0] },
+  { min: 23.80, max: 198.5, coeffs: [5.39971, -1.33447, 0.0, 0.0, 0.0, 0.0, 0.0] }
+];
+
+const SPHERICAL_REFLECTED_PRESSURE: CoeffRange[] = [
+  { min: 0.148, max: 2.90, coeffs: [8.26049, -2.54107, -0.34397, 0.049, 0.04288, 0.0, 0.0] },
+  { min: 2.90, max: 40.00, coeffs: [12.36133, -11.12002, 5.5102, -1.36809, 0.12638, 0.0, 0.0] }
+];
+
+const SPHERICAL_INCIDENT_IMPULSE: CoeffRange[] = [
+  { min: 0.148, max: 2.90, coeffs: [4.97684, -0.92232, -0.11323, 0.07582, 0.03658, 0.0, 0.0] },
+  { min: 2.90, max: 23.80, coeffs: [-2.50228, 16.73448, -14.93514, 5.40371, -0.70159, 0.0, 0.0] },
+  { min: 23.80, max: 198.5, coeffs: [5.84795, -1.2916, 0.0, 0.0, 0.0, 0.0, 0.0] }
+];
+
+const SPHERICAL_REFLECTED_IMPULSE: CoeffRange[] = [
+  { min: 0.148, max: 2.90, coeffs: [5.851, -0.85787, -0.11274, 0.03248, 0.01446, 0.0, 0.0] },
+  { min: 2.90, max: 40.00, coeffs: [5.38228, -0.017, -0.61626, 0.18847, -0.01981, 0.0, 0.0] }
+];
+
+const SPHERICAL_ARRIVAL_TIME: CoeffRange[] = [
+  { min: 0.148, max: 2.90, coeffs: [-0.52539, 1.14767, 0.08316, 0.0, 0.0, 0.0, 0.0] },
+  { min: 2.90, max: 40.00, coeffs: [0.20682, 0.46614, 0.07737, 0.0, 0.0, 0.0, 0.0] }
+];
+
+const SPHERICAL_POSITIVE_DURATION: CoeffRange[] = [
+  { min: 0.148, max: 2.90, coeffs: [1.08504, 0.34797, 0.07646, 0.0, 0.0, 0.0, 0.0] },
+  { min: 2.90, max: 40.00, coeffs: [1.61406, -0.06479, -0.00253, 0.0, 0.0, 0.0, 0.0] }
+];
+
+function evalSwisdakPolynomial(coeffs: number[], Z: number): number {
+  const U = Math.log(Z);
+  let log_Y = 0.0;
+  for (let i = 0; i < coeffs.length; i++) {
+    log_Y += coeffs[i] * Math.pow(U, i);
+  }
+  return Math.exp(log_Y);
+}
+
+function selectAndEval(tables: CoeffRange[], Z: number): number {
+  const overall_min = tables[0].min;
+  const overall_max = tables[tables.length - 1].max;
+  const Z_clamped = Math.min(Math.max(Z, overall_min), overall_max);
+  
+  for (const range of tables) {
+    if (Z_clamped >= range.min && Z_clamped <= range.max) {
+      return evalSwisdakPolynomial(range.coeffs, Z_clamped);
+    }
+  }
+  return evalSwisdakPolynomial(tables[tables.length - 1].coeffs, Z_clamped);
+}
+
+function solveDecayParameter(pso: number, impulse: number, duration: number): number {
+  let k = impulse / (pso * duration);
+  k = Math.max(1e-4, Math.min(k, 0.4999));
+  
+  let b = 0.0;
+  if (k > 0.4) {
+    b = 6.0 * (0.5 - k);
+  } else {
+    b = 1.0 / k;
+  }
+  
+  for (let i = 0; i < 20; i++) {
+    const eb = Math.exp(-b);
+    const f = (b - 1.0 + eb) / (b * b) - k;
+    const df = (2.0 - b - (b + 2.0) * eb) / (b * b * b);
+    if (Math.abs(df) < 1e-12) {
+      break;
+    }
+    const next_b = b - f / df;
+    if (next_b <= 0) {
+      b = b / 2.0;
+    } else if (Math.abs(next_b - b) < 1e-6) {
+      b = next_b;
+      break;
+    } else {
+      b = next_b;
+    }
+  }
+  return b;
+}
+
+function calculateKbParameters(scaled_distance: number, burst_type: string) {
+  const Z = Math.max(scaled_distance, 0.05);
+  let incident_p: number;
+  let reflected_p: number;
+  let positive_impulse: number;
+  let reflected_impulse: number;
+  let arrival_time: number;
+  let positive_duration: number;
+
+  if (burst_type === "Surface") {
+    incident_p = selectAndEval(SURFACE_INCIDENT_PRESSURE, Z);
+    reflected_p = selectAndEval(SURFACE_REFLECTED_PRESSURE, Z);
+    positive_impulse = selectAndEval(SURFACE_INCIDENT_IMPULSE, Z);
+    reflected_impulse = selectAndEval(SURFACE_REFLECTED_IMPULSE, Z);
+    arrival_time = selectAndEval(SURFACE_ARRIVAL_TIME, Z);
+    positive_duration = selectAndEval(SURFACE_POSITIVE_DURATION, Z);
+  } else {
+    incident_p = selectAndEval(SPHERICAL_INCIDENT_PRESSURE, Z);
+    reflected_p = selectAndEval(SPHERICAL_REFLECTED_PRESSURE, Z);
+    positive_impulse = selectAndEval(SPHERICAL_INCIDENT_IMPULSE, Z);
+    reflected_impulse = selectAndEval(SPHERICAL_REFLECTED_IMPULSE, Z);
+    arrival_time = selectAndEval(SPHERICAL_ARRIVAL_TIME, Z);
+    positive_duration = selectAndEval(SPHERICAL_POSITIVE_DURATION, Z);
+  }
+
+  const P0 = 101.325;
+  const dynamic_p = 2.5 * (incident_p * incident_p) / (7.0 * P0 + incident_p);
+  
+  const C0 = 340.292;
+  const shock_front_velocity = C0 * Math.sqrt(1.0 + 6.0 * incident_p / (7.0 * P0));
+  const particle_velocity = (5.0 * C0 * incident_p) / (7.0 * P0 * Math.sqrt(1.0 + 6.0 * incident_p / (7.0 * P0)));
+  
+  const decay_b = solveDecayParameter(incident_p, positive_impulse, positive_duration);
+  const negative_duration = positive_duration * (1.0 + 1.0 / decay_b);
+
+  return {
+    scaled_distance: Z,
+    incident_pressure: incident_p,
+    reflected_pressure: reflected_p,
+    dynamic_pressure: dynamic_p,
+    positive_impulse,
+    reflected_impulse,
+    positive_duration,
+    negative_duration,
+    arrival_time,
+    shock_front_velocity,
+    particle_velocity,
+    decay_parameter: decay_b
+  };
+}
+
+// Physics simulation matching dual TNT math using Swisdak (1994)
 function simulateCalculateBlast(weight: number, distance: number, burstType: string, explosiveId: number): BlastResults {
   const explosive = mockExplosives.find(e => e.id === explosiveId) || mockExplosives[0];
   const pFactor = explosive.pressure_equivalency;
   const iFactor = explosive.impulse_equivalency;
   const gFactor = explosive.general_equivalency || pFactor;
 
-  // Surface bursts double effective charge weight due to ground reflection
-  const reflFactor = burstType === 'Surface' ? 2.0 : 1.0;
-  const W_p = weight * pFactor * reflFactor;
-  const W_i = weight * iFactor * reflFactor;
-  const W_g = weight * gFactor * reflFactor;
+  const W_p = weight * pFactor;
+  const W_i = weight * iFactor;
+  const W_g = weight * gFactor;
 
-  const Z_p = distance / Math.pow(W_p, 1 / 3);
-  const Z_i = distance / Math.pow(W_i, 1 / 3);
-  const Z_g = distance / Math.pow(W_g, 1 / 3);
+  const Z_p = distance / Math.pow(W_p, 1.0 / 3.0);
+  const Z_i = distance / Math.pow(W_i, 1.0 / 3.0);
+  const Z_g = distance / Math.pow(W_g, 1.0 / 3.0);
 
-  // Standoff pressure / impulse decays
-  const incident_pressure = 450.0 / Math.pow(Z_p, 1.45);
-  const reflected_pressure = incident_pressure * (2.1 + 3.9 / (1.0 + 0.3 * Z_p));
-  const dynamic_pressure = incident_pressure * 0.45;
-  
-  const positive_impulse = 180.0 * Math.pow(W_i, 1 / 3) / Math.pow(Z_i, 1.15);
-  const positive_duration = 4.5 + 2.2 * Z_p;
-  const negative_duration = 9.0 + 2.8 * Z_p;
-  const arrival_time = 0.45 * Z_p;
+  const kb_p = calculateKbParameters(Z_p, burstType);
+  const kb_i = calculateKbParameters(Z_i, burstType);
+
+  const w_p_factor = Math.pow(W_p, 1.0 / 3.0);
+  const w_i_factor = Math.pow(W_i, 1.0 / 3.0);
+
+  const incident_p = kb_p.incident_pressure;
+  const reflected_p = kb_p.reflected_pressure;
 
   return {
     scaled_distance: Z_g,
-    incident_pressure: Math.max(incident_pressure, 0.1),
-    reflected_pressure: Math.max(reflected_pressure, 0.1),
-    dynamic_pressure: Math.max(dynamic_pressure, 0.05),
-    positive_impulse: Math.max(positive_impulse, 0.1),
-    positive_duration: Math.max(positive_duration, 0.1),
-    negative_duration: Math.max(negative_duration, 0.1),
-    arrival_time: Math.max(arrival_time, 0.01),
+    incident_pressure: incident_p,
+    reflected_pressure: reflected_p,
+    dynamic_pressure: kb_p.dynamic_pressure,
+    positive_impulse: kb_i.positive_impulse * w_i_factor,
+    positive_duration: kb_i.positive_duration * w_i_factor,
+    negative_duration: kb_i.negative_duration * w_i_factor,
+    arrival_time: kb_p.arrival_time * w_p_factor,
+    shock_front_velocity: kb_p.shock_front_velocity,
+    particle_velocity: kb_p.particle_velocity,
+    decay_parameter: kb_i.decay_parameter,
     model_used: "Kingery-Bulmash",
-    model_version: "v1.0 (Mock Fallback)"
+    model_version: "v2.0"
   };
 }
 
 function simulateAssessBatch(results: BlastResults): DamageAssessment[] {
+  const angle = 0.0;
+  const angle_rad = (angle * Math.PI) / 180.0;
+  
+  const H = 3.0;
+  const W = 4.0;
+  const S = Math.min(H, W / 2.0);
+  const P0 = 101.325;
+
   return mockProfiles.map(prof => {
     const isFacade = prof.family === 'Glass' || prof.family === 'Masonry';
-    const P = isFacade ? results.reflected_pressure : results.incident_pressure;
-    const I = results.positive_impulse;
+    let P_actual = results.incident_pressure;
+    let I_actual = results.positive_impulse;
 
-    const P_ratio = P / prof.minor_pressure;
-    const I_ratio = I / prof.minor_impulse;
+    if (isFacade) {
+      const P_incident = results.incident_pressure;
+      const P_reflected = results.reflected_pressure;
+      const I_incident = results.positive_impulse;
+      const I_reflected = results.positive_impulse;
+
+      const cos2 = Math.pow(Math.cos(angle_rad), 2);
+      const P_adj = P_incident + (P_reflected - P_incident) * cos2;
+      const I_adj = I_incident + (I_reflected - I_incident) * cos2;
+
+      const c0 = 0.340;
+      const term = 1.0 + (6.0 * P_incident) / (7.0 * P0);
+      const U_shock = c0 * Math.sqrt(Math.max(0.1, term));
+
+      const t_c = U_shock > 0 ? (3.0 * S) / U_shock : 9999.0;
+      const t_d = results.positive_duration || 10.0;
+
+      const Q_so = results.dynamic_pressure || 0.0;
+      const P_stag = P_incident + Q_so;
+
+      if (t_c < t_d) {
+        const I_cleared = P_adj * (t_c / 2.0) + P_stag * ((t_d - t_c) / 2.0);
+        I_actual = Math.min(I_adj, I_cleared);
+      } else {
+        I_actual = I_adj;
+      }
+      P_actual = P_adj;
+    }
+
+    const P_ratio = P_actual / prof.minor_pressure;
+    const I_ratio = I_actual / prof.minor_impulse;
     const DI = Math.max(P_ratio, I_ratio);
     const mode = P_ratio >= I_ratio ? 'Pressure' : 'Impulse';
 
     let level: 'Safe' | 'Minor' | 'Moderate' | 'Severe' | 'Failure' = 'Safe';
-    if (DI < 1.0) level = 'Safe';
-    else if (DI < 2.0) level = 'Minor';
-    else if (DI < 4.0) level = 'Moderate';
-    else level = 'Severe';
+    
+    if (prof.failure_pressure && prof.failure_impulse && P_actual >= prof.failure_pressure && I_actual >= prof.failure_impulse) {
+      level = 'Failure';
+    } else if (prof.severe_pressure && prof.severe_impulse && P_actual >= prof.severe_pressure && I_actual >= prof.severe_impulse) {
+      level = 'Severe';
+    } else if (prof.moderate_pressure && prof.moderate_impulse && P_actual >= prof.moderate_pressure && I_actual >= prof.moderate_impulse) {
+      level = 'Moderate';
+    } else if (prof.minor_pressure && prof.minor_impulse && P_actual >= prof.minor_pressure && I_actual >= prof.minor_impulse) {
+      level = 'Minor';
+    } else {
+      level = 'Safe';
+    }
 
     let state = level as string;
     let score = DI / 4.0;
@@ -137,7 +357,7 @@ function simulateAssessBatch(results: BlastResults): DamageAssessment[] {
       assessment_reason: `Damage Index ${DI.toFixed(2)} governed by ${mode} (P-ratio: ${P_ratio.toFixed(2)}, I-ratio: ${I_ratio.toFixed(2)})`,
       confidence_level: prof.confidence_level || 'High',
       source_reference: prof.source_title || 'UFC 3-340-02',
-      response_model_version: 'v1.0 (Mock Fallback)'
+      response_model_version: 'v2.0 (Mock Fallback)'
     };
   });
 }
@@ -687,6 +907,36 @@ export const api = {
         return window.api!.invoke('database:import');
       }
       return Promise.resolve({ success: false, error: 'Database import is only supported in native desktop mode.' });
+    }
+  },
+  inverse: {
+    predict: (params: {
+      burstType: string;
+      incident_pressure: number;
+      reflected_pressure: number;
+      positive_impulse: number;
+      reflected_impulse: number;
+      arrival_time: number;
+      positive_duration: number;
+    }): Promise<{
+      weight: number;
+      scaled_distance: number;
+      distance: number;
+      confidence: number;
+      model_used: string;
+      ood?: boolean;
+    }> => {
+      if (isElectron) {
+        return window.api!.invoke('inverse:predict', params);
+      }
+      return Promise.resolve({
+        weight: 100.0,
+        scaled_distance: 1.0,
+        distance: 4.641588,
+        confidence: 95.0,
+        model_used: "Random Forest (Mock Fallback)",
+        ood: false
+      });
     }
   }
 };

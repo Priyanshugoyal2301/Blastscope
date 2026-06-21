@@ -74,10 +74,10 @@ export default function HeatmapPlot({ points, profileId, charges_kg, distances_m
     zmin: 0,
     zmax: 1,
     colorbar: {
-      title: { text: 'Severity', font: { color: '#94a3b8', size: 11 } },
+      title: { text: 'Severity', font: { color: '#4b5563', size: 11 } },
       tickvals: [0, 0.2, 0.4, 0.6, 0.8, 1.0],
       ticktext: ['0 (Safe)', '0.2', '0.4 (Moderate)', '0.6', '0.8 (Severe)', '1.0 (Failure)'],
-      tickfont: { color: '#94a3b8', size: 9 },
+      tickfont: { color: '#4b5563', size: 9 },
       len: 0.9,
     },
   }];
@@ -85,18 +85,18 @@ export default function HeatmapPlot({ points, profileId, charges_kg, distances_m
   const layout = {
     title: {
       text: title ?? 'Vulnerability Heatmap (Charge × Distance)',
-      font: { color: '#e2e8f0', size: 14 },
+      font: { color: '#1f2937', size: 14 },
     },
     paper_bgcolor: 'transparent',
-    plot_bgcolor: 'rgba(0,0,0,0.2)',
-    font: { color: '#94a3b8', family: 'Inter, system-ui, sans-serif', size: 11 },
+    plot_bgcolor: '#ffffff',
+    font: { color: '#4b5563', family: 'Inter, system-ui, sans-serif', size: 11 },
     xaxis: {
-      title: { text: 'Standoff Distance (m)', font: { color: '#94a3b8' } },
-      gridcolor: 'rgba(255,255,255,0.06)',
+      title: { text: 'Standoff Distance (m)', font: { color: '#4b5563' } },
+      gridcolor: '#e5e7eb',
     },
     yaxis: {
-      title: { text: 'Charge Weight (kg)', font: { color: '#94a3b8' } },
-      gridcolor: 'rgba(255,255,255,0.06)',
+      title: { text: 'Charge Weight (kg)', font: { color: '#4b5563' } },
+      gridcolor: '#e5e7eb',
     },
     margin: { l: 70, r: 20, t: 48, b: 60 },
   };

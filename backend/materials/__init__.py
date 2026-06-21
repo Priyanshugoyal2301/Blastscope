@@ -4,6 +4,7 @@ from .masonry import Masonry
 from .rc import ReinforcedConcrete
 from .steel import Steel
 from .uhpc import UHPC
+from .human import HumanInjury
 
 # Registry mapping material profile names to their Python classes
 MATERIAL_CLASS_MAP = {
@@ -12,5 +13,7 @@ MATERIAL_CLASS_MAP = {
     "Brick Masonry Unreinforced": Masonry,
     "Reinforced Concrete M30": ReinforcedConcrete,
     "Ultra-High Performance Concrete (UHPC)": UHPC,
-    "Structural Steel Grade 250": Steel
+    "Structural Steel Grade 250": Steel,
+    "Human Vulnerability": HumanInjury
 }
+

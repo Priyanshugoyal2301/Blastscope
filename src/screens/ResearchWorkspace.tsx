@@ -237,9 +237,9 @@ export default function ResearchWorkspace({
                 gap: '8px',
                 padding: '12px 18px',
                 border: 'none',
-                background: isActive ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
+                background: isActive ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
                 borderBottom: isActive ? '2px solid var(--primary)' : '2px solid transparent',
-                color: isActive ? '#fff' : 'var(--text-muted)',
+                color: isActive ? 'var(--primary)' : 'var(--text-muted)',
                 fontWeight: isActive ? 600 : 500,
                 fontSize: '0.9rem',
                 cursor: 'pointer',
@@ -268,18 +268,18 @@ export default function ResearchWorkspace({
               />
             </div>
             <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <h3 style={{ fontSize: '1rem', color: '#fff' }}>Plot Details</h3>
+              <h3 style={{ fontSize: '1rem', color: 'var(--text-main)' }}>Plot Details</h3>
               <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
-                This chart displays the decay of blast incident pressure (P_so) and reflected pressure (Pr) over distances ranging from 1 to 100 meters, using calculations modeled for a <strong style={{ color: '#fff' }}>{activeScenario.charge_weight} kg</strong> burst.
+                This chart displays the decay of blast incident pressure (P_so) and reflected pressure (Pr) over distances ranging from 1 to 100 meters, using calculations modeled for a <strong style={{ color: 'var(--text-main)' }}>{activeScenario.charge_weight} kg</strong> burst.
               </p>
               
               <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)' }}>Calculation Parameters:</span>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.8rem' }}>
-                  <div>Explosive: <strong style={{ color: '#fff' }}>{activeScenario.explosive_name || 'TNT'}</strong></div>
-                  <div>Burst Type: <strong style={{ color: '#fff' }}>{activeScenario.burst_type}</strong></div>
-                  <div>Model Used: <strong style={{ color: '#fff' }}>{activeResults.model_used}</strong></div>
-                  <div>Version: <strong style={{ color: '#fff' }}>{activeResults.model_version}</strong></div>
+                  <div>Explosive: <strong style={{ color: 'var(--text-main)' }}>{activeScenario.explosive_name || 'TNT'}</strong></div>
+                  <div>Burst Type: <strong style={{ color: 'var(--text-main)' }}>{activeScenario.burst_type}</strong></div>
+                  <div>Model Used: <strong style={{ color: 'var(--text-main)' }}>{activeResults.model_used}</strong></div>
+                  <div>Version: <strong style={{ color: 'var(--text-main)' }}>{activeResults.model_version}</strong></div>
                 </div>
               </div>
             </div>
@@ -304,7 +304,7 @@ export default function ResearchWorkspace({
             </div>
 
             <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px', overflowY: 'auto' }}>
-              <h3 style={{ fontSize: '1rem', color: '#fff' }}>Compare Configurations</h3>
+              <h3 style={{ fontSize: '1rem', color: 'var(--text-main)' }}>Compare Configurations</h3>
               
               <div className="form-group">
                 <label className="form-label">Compare Metric</label>
@@ -330,7 +330,7 @@ export default function ResearchWorkspace({
                         onChange={() => toggleScenarioSelection(sc.id!)}
                         style={{ accentColor: 'var(--primary)' }}
                       />
-                      <span style={{ color: selectedScenarios.includes(sc.id!) ? '#fff' : 'var(--text-muted)' }}>
+                      <span style={{ color: selectedScenarios.includes(sc.id!) ? 'var(--text-main)' : 'var(--text-muted)', fontWeight: selectedScenarios.includes(sc.id!) ? 600 : 500 }}>
                         {sc.name} ({sc.charge_weight}kg)
                       </span>
                     </label>
@@ -365,7 +365,7 @@ export default function ResearchWorkspace({
             </div>
 
             <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <h3 style={{ fontSize: '1rem', color: '#fff' }}>Configure Parametric Sweep</h3>
+              <h3 style={{ fontSize: '1rem', color: 'var(--text-main)' }}>Configure Parametric Sweep</h3>
               
               <div className="form-group">
                 <label className="form-label">Sweep Variable</label>
@@ -421,7 +421,7 @@ export default function ResearchWorkspace({
             </div>
 
             <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px', overflowY: 'auto' }}>
-              <h3 style={{ fontSize: '1rem', color: '#fff' }}>Overlay Threshold Limits</h3>
+              <h3 style={{ fontSize: '1rem', color: 'var(--text-main)' }}>Overlay Threshold Limits</h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
                 Select targets to render horizontal failure boundaries. Overlap points with the current blast curve indicate failure distance zones.
               </p>
@@ -435,7 +435,7 @@ export default function ResearchWorkspace({
                       onChange={() => toggleProfileSelection(p.id)}
                       style={{ accentColor: 'var(--primary)' }}
                     />
-                    <span style={{ color: selectedProfiles.includes(p.id) ? '#fff' : 'var(--text-muted)' }}>
+                    <span style={{ color: selectedProfiles.includes(p.id) ? 'var(--text-main)' : 'var(--text-muted)', fontWeight: selectedProfiles.includes(p.id) ? 600 : 500 }}>
                       {p.profile_name} ({p.failure_pressure} kPa)
                     </span>
                   </label>
@@ -452,7 +452,7 @@ export default function ResearchWorkspace({
               <RadarPlot assessments={assessments} />
             </div>
             <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px', overflowY: 'auto' }}>
-              <h3 style={{ fontSize: '1rem', color: '#fff' }}>Radar Chart Analysis</h3>
+              <h3 style={{ fontSize: '1rem', color: 'var(--text-main)' }}>Radar Chart Analysis</h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
                 This radar chart plots the normalized Damage Index (DI) for each material profile. Values are scaled from 0 (Safe) to 1 (Severe/Failure boundary, corresponding to DI &ge; 4.0).
               </p>
@@ -480,15 +480,15 @@ export default function ResearchWorkspace({
 
         {/* Tab 6: Model Validation & Calibration */}
         {activeTab === 'validation' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', height: '100%' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', height: 'auto' }}>
             
             {/* Top row: Metrics and PI Plot */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '20px', minHeight: '380px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '20px', height: '450px' }}>
               
               {/* Metrics panel */}
-              <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px', height: '100%' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <h3 style={{ fontSize: '1rem', color: '#fff', margin: 0 }}>Model Accuracy Benchmark Dashboard</h3>
+                  <h3 style={{ fontSize: '1rem', color: 'var(--text-main)', margin: 0 }}>Model Accuracy Benchmark Dashboard</h3>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <button 
                       className="btn btn-secondary" 
@@ -540,10 +540,10 @@ export default function ResearchWorkspace({
                             <tr 
                               key={index} 
                               style={{ 
-                                borderBottom: '1px solid rgba(255,255,255,0.05)',
+                                borderBottom: '1px solid var(--border-color)',
                                 fontWeight: isTotal ? 'bold' : 'normal',
-                                background: isTotal ? 'rgba(59,130,246,0.08)' : 'transparent',
-                                color: isTotal ? '#fff' : 'var(--text-main)'
+                                background: isTotal ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
+                                color: isTotal ? 'var(--primary)' : 'var(--text-main)'
                               }}
                             >
                               <td style={{ padding: '6px', fontWeight: 'bold' }}>{sum.ground_truth_class}</td>
@@ -577,7 +577,7 @@ export default function ResearchWorkspace({
 
                   {/* Source Distribution table */}
                   <div style={{ flex: 1, overflowY: 'auto', borderLeft: '1px solid var(--border-color)', paddingLeft: '20px' }}>
-                    <h4 style={{ fontSize: '0.8rem', color: '#fff', marginTop: 0, marginBottom: '8px' }}>
+                    <h4 style={{ fontSize: '0.8rem', color: 'var(--text-main)', marginTop: 0, marginBottom: '8px' }}>
                       Validation Source Distribution
                     </h4>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.74rem', textAlign: 'left' }}>
@@ -589,7 +589,7 @@ export default function ResearchWorkspace({
                       </thead>
                       <tbody>
                         {sourceDist.map((item, index) => (
-                          <tr key={index} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                          <tr key={index} style={{ borderBottom: '1px solid var(--border-color)' }}>
                             <td style={{ padding: '6px' }}>{item.source}</td>
                             <td style={{ padding: '6px', textAlign: 'right', fontWeight: 'bold' }}>{item.cases}</td>
                           </tr>
@@ -613,7 +613,7 @@ export default function ResearchWorkspace({
 
             {/* Bottom Row: Detailed Cases Table */}
             <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <h3 style={{ fontSize: '0.95rem', color: '#fff', margin: 0 }}>Detailed Verification Cases (N = 30)</h3>
+              <h3 style={{ fontSize: '0.95rem', color: 'var(--text-main)', margin: 0 }}>Detailed Verification Cases (N = 30)</h3>
               <div style={{ maxHeight: '250px', overflowY: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', textAlign: 'left' }}>
                   <thead>
@@ -632,7 +632,7 @@ export default function ResearchWorkspace({
                   </thead>
                   <tbody>
                     {validationCases.map((c) => (
-                      <tr key={c.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                      <tr key={c.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                         <td style={{ padding: '6px' }}>{c.validation_source} ({c.validation_page})</td>
                         <td style={{ padding: '6px' }}>{c.burst_type}</td>
                         <td style={{ padding: '6px' }}>{c.ground_truth_class}</td>

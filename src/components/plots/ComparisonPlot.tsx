@@ -39,28 +39,28 @@ export default function ComparisonPlot({ scenariosCurves, metric, metricLabel }:
         layout={{
           title: {
             text: `Comparative ${metricLabel} Curves`,
-            font: { color: '#ffffff', family: 'Outfit', size: 16 }
+            font: { color: '#1f2937', family: 'Outfit', size: 16 }
           },
           paper_bgcolor: 'rgba(0,0,0,0)',
-          plot_bgcolor: 'rgba(17, 22, 41, 0.4)',
+          plot_bgcolor: '#ffffff',
           margin: { t: 50, b: 50, l: 60, r: 20 },
           xaxis: {
             title: 'Distance (m)',
-            titlefont: { color: '#9ca3af' },
-            tickfont: { color: '#9ca3af' },
-            gridcolor: 'rgba(255, 255, 255, 0.05)',
-            zerolinecolor: 'rgba(255, 255, 255, 0.1)'
+            titlefont: { color: '#4b5563' },
+            tickfont: { color: '#4b5563' },
+            gridcolor: '#e5e7eb',
+            zerolinecolor: '#d1d5db'
           },
           yaxis: {
             title: `${metricLabel}`,
-            titlefont: { color: '#9ca3af' },
-            tickfont: { color: '#9ca3af' },
-            gridcolor: 'rgba(255, 255, 255, 0.05)',
-            zerolinecolor: 'rgba(255, 255, 255, 0.1)',
+            titlefont: { color: '#4b5563' },
+            tickfont: { color: '#4b5563' },
+            gridcolor: '#e5e7eb',
+            zerolinecolor: '#d1d5db',
             type: 'log'
           },
           legend: {
-            font: { color: '#9ca3af' },
+            font: { color: '#4b5563' },
             orientation: 'h',
             y: -0.2
           },

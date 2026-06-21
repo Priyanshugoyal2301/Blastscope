@@ -155,7 +155,7 @@ export default function ParametricStudy({ explosives, profiles, gridResult, setG
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-fade-in">
       {/* Study Type Selector */}
       <div className="glass-panel" style={{ padding: '20px' }}>
-        <h2 style={{ fontSize: '1.1rem', color: '#fff', marginBottom: '16px' }}>Parametric Study Configuration</h2>
+        <h2 style={{ fontSize: '1.1rem', color: 'var(--text-main)', marginBottom: '16px' }}>Parametric Study Configuration</h2>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '20px' }}>
           {(['distance', 'charge', 'explosive', 'grid'] as StudyType[]).map(st => (
             <button
@@ -163,9 +163,9 @@ export default function ParametricStudy({ explosives, profiles, gridResult, setG
               onClick={() => setStudyType(st)}
               style={{
                 padding: '8px 14px', borderRadius: '6px', border: '1px solid',
-                borderColor: studyType === st ? 'var(--accent)' : 'var(--border-color)',
-                background: studyType === st ? 'rgba(99,102,241,0.15)' : 'transparent',
-                color: studyType === st ? 'var(--accent)' : 'var(--text-muted)',
+                borderColor: studyType === st ? 'var(--primary)' : 'var(--border-color)',
+                background: studyType === st ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
+                color: studyType === st ? 'var(--primary)' : 'var(--text-muted)',
                 cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600,
                 display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s',
               }}
@@ -191,9 +191,9 @@ export default function ParametricStudy({ explosives, profiles, gridResult, setG
                       onClick={() => toggleExplosive(e.id)}
                       style={{
                         padding: '4px 10px', borderRadius: '4px', border: '1px solid',
-                        borderColor: explosiveIds.includes(e.id) ? '#f97316' : 'var(--border-color)',
-                        background: explosiveIds.includes(e.id) ? 'rgba(249,115,22,0.15)' : 'transparent',
-                        color: explosiveIds.includes(e.id) ? '#f97316' : 'var(--text-muted)',
+                        borderColor: explosiveIds.includes(e.id) ? 'var(--primary)' : 'var(--border-color)',
+                        background: explosiveIds.includes(e.id) ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
+                        color: explosiveIds.includes(e.id) ? 'var(--primary)' : 'var(--text-muted)',
                         cursor: 'pointer', fontSize: '0.78rem', transition: 'all 0.2s',
                       }}
                     >
@@ -208,8 +208,8 @@ export default function ParametricStudy({ explosives, profiles, gridResult, setG
                 <select
                   value={explosiveId}
                   onChange={e => setExplosiveId(Number(e.target.value))}
-                  className="form-select"
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: '#fff', fontSize: '0.82rem' }}
+                  className="form-input"
+                  style={{ width: '100%', padding: '8px 10px', fontSize: '0.82rem' }}
                 >
                   {explosives.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
                 </select>
@@ -222,17 +222,19 @@ export default function ParametricStudy({ explosives, profiles, gridResult, setG
                 <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Charge Weight (kg)</label>
                 <input
                   type="number" value={chargeKg} onChange={e => setChargeKg(e.target.value)} min="0.1"
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: '#fff', fontSize: '0.82rem', boxSizing: 'border-box' }}
+                  className="form-input"
+                  style={{ width: '100%', padding: '8px 10px', fontSize: '0.82rem', boxSizing: 'border-box' }}
                 />
               </div>
             ) : (
               <div>
                 <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
-                  Charges (kg) — comma list or <code style={{ color: '#a5b4fc', fontSize: '0.75rem' }}>start:end:step</code>
+                  Charges (kg) — comma list or <code style={{ color: 'var(--primary)', fontSize: '0.75rem' }}>start:end:step</code>
                 </label>
                 <input
                   type="text" value={chargesKgStr} onChange={e => setChargesKgStr(e.target.value)} placeholder="10:200:10"
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: '#fff', fontSize: '0.82rem', boxSizing: 'border-box' }}
+                  className="form-input"
+                  style={{ width: '100%', padding: '8px 10px', fontSize: '0.82rem', boxSizing: 'border-box' }}
                 />
                 <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', margin: '4px 0 0' }}>{chargesKg.length} values · {chargesKg[0]?.toFixed(0)}–{chargesKg[chargesKg.length - 1]?.toFixed(0)} kg</p>
               </div>
@@ -244,17 +246,19 @@ export default function ParametricStudy({ explosives, profiles, gridResult, setG
                 <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Fixed Distance (m)</label>
                 <input
                   type="number" value={distanceMStr} onChange={e => setDistanceMStr(e.target.value)} min="1"
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: '#fff', fontSize: '0.82rem', boxSizing: 'border-box' }}
+                  className="form-input"
+                  style={{ width: '100%', padding: '8px 10px', fontSize: '0.82rem', boxSizing: 'border-box' }}
                 />
               </div>
             ) : (
               <div>
                 <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
-                  Distances (m) — comma list or <code style={{ color: '#a5b4fc', fontSize: '0.75rem' }}>start:end:step</code>
+                  Distances (m) — comma list or <code style={{ color: 'var(--primary)', fontSize: '0.75rem' }}>start:end:step</code>
                 </label>
                 <input
                   type="text" value={distancesMStr} onChange={e => setDistancesMStr(e.target.value)} placeholder="5:100:5"
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: '#fff', fontSize: '0.82rem', boxSizing: 'border-box' }}
+                  className="form-input"
+                  style={{ width: '100%', padding: '8px 10px', fontSize: '0.82rem', boxSizing: 'border-box' }}
                 />
                 <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', margin: '4px 0 0' }}>{distancesM.length} values · {distancesM[0]?.toFixed(0)}–{distancesM[distancesM.length - 1]?.toFixed(0)} m</p>
               </div>
@@ -266,7 +270,8 @@ export default function ParametricStudy({ explosives, profiles, gridResult, setG
               <select
                 value={burstType}
                 onChange={e => setBurstType(e.target.value as any)}
-                style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: '#fff', fontSize: '0.82rem' }}
+                className="form-input"
+                style={{ width: '100%', padding: '8px 10px', fontSize: '0.82rem' }}
               >
                 <option value="Surface">Surface Burst</option>
                 <option value="Air">Air Burst</option>
@@ -287,9 +292,9 @@ export default function ParametricStudy({ explosives, profiles, gridResult, setG
                   onClick={() => toggleProfile(p.id)}
                   style={{
                     padding: '8px 12px', borderRadius: '6px', border: '1px solid',
-                    borderColor: profileIds.includes(p.id) ? 'var(--accent)' : 'var(--border-color)',
-                    background: profileIds.includes(p.id) ? 'rgba(99,102,241,0.12)' : 'transparent',
-                    color: profileIds.includes(p.id) ? '#e2e8f0' : 'var(--text-muted)',
+                    borderColor: profileIds.includes(p.id) ? 'var(--primary)' : 'var(--border-color)',
+                    background: profileIds.includes(p.id) ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
+                    color: profileIds.includes(p.id) ? 'var(--text-main)' : 'var(--text-muted)',
                     cursor: 'pointer', textAlign: 'left', fontSize: '0.78rem', transition: 'all 0.2s',
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                   }}
@@ -329,9 +334,9 @@ export default function ParametricStudy({ explosives, profiles, gridResult, setG
             disabled={running || limitStatus === 'blocked' || profileIds.length === 0}
             style={{
               marginLeft: 'auto', padding: '9px 22px', borderRadius: '7px',
-              background: confirming ? 'linear-gradient(135deg, #f97316, #ef4444)' : 'linear-gradient(135deg, var(--accent), #7c3aed)',
+              background: confirming ? 'var(--status-severe)' : 'var(--primary)',
               color: '#fff', border: 'none', cursor: running || limitStatus === 'blocked' ? 'not-allowed' : 'pointer',
-              fontSize: '0.82rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px',
+              fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px',
               opacity: running || limitStatus === 'blocked' ? 0.5 : 1, transition: 'all 0.2s',
             }}
           >
@@ -365,11 +370,11 @@ export default function ParametricStudy({ explosives, profiles, gridResult, setG
         <>
           <div className="glass-panel" style={{ padding: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-              <h3 style={{ fontSize: '0.95rem', color: '#fff', margin: 0 }}>
+              <h3 style={{ fontSize: '0.95rem', color: 'var(--text-main)', margin: 0 }}>
                 {STUDY_LABELS[studyType]} Results
               </h3>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                {sweepPoints.length.toLocaleString()} data points · study_id: <code style={{ color: '#a5b4fc', fontSize: '0.7rem' }}>{sweepPoints[0]?.study_id}</code>
+                {sweepPoints.length.toLocaleString()} data points · study_id: <code style={{ color: 'var(--primary)', fontSize: '0.7rem' }}>{sweepPoints[0]?.study_id}</code>
               </span>
             </div>
             <SweepPlot

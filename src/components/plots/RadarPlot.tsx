@@ -80,11 +80,11 @@ export default function RadarPlot({ assessments }: RadarPlotProps) {
       r: closedR,
       theta: closedTheta,
       fill: 'toself',
-      fillcolor: 'rgba(99, 102, 241, 0.25)',
+      fillcolor: 'rgba(37, 99, 235, 0.15)',
       mode: 'lines+markers',
       name: 'Scenario Damage Index',
       line: {
-        color: '#6366f1',
+        color: 'var(--primary)',
         width: 2.5
       },
       marker: {
@@ -108,7 +108,7 @@ export default function RadarPlot({ assessments }: RadarPlotProps) {
         layout={{
           title: {
             text: 'Material Vulnerability Radar (Normalized DI)',
-            font: { color: '#ffffff', family: 'Outfit', size: 16 }
+            font: { color: '#1f2937', family: 'Outfit', size: 16 }
           },
           paper_bgcolor: 'rgba(0,0,0,0)',
           margin: { t: 50, b: 30, l: 30, r: 30 },
@@ -118,20 +118,20 @@ export default function RadarPlot({ assessments }: RadarPlotProps) {
               range: [0, 1.0],
               tickvals: [0, 0.25, 0.5, 0.75, 1.0],
               ticktext: ['Safe (0)', 'Minor (1)', 'Mod (2)', '3', 'Severe (4+)'],
-              tickfont: { color: '#9ca3af', size: 8 },
-              gridcolor: 'rgba(255, 255, 255, 0.05)',
-              linecolor: 'rgba(255, 255, 255, 0.1)'
+              tickfont: { color: '#4b5563', size: 8 },
+              gridcolor: '#e5e7eb',
+              linecolor: '#d1d5db'
             },
             angularaxis: {
-              tickfont: { color: '#ffffff', size: 10, family: 'Outfit' },
-              gridcolor: 'rgba(255, 255, 255, 0.05)',
-              linecolor: 'rgba(255, 255, 255, 0.1)',
+              tickfont: { color: '#1f2937', size: 10, family: 'Outfit' },
+              gridcolor: '#e5e7eb',
+              linecolor: '#d1d5db',
               direction: 'clockwise'
             },
-            bgcolor: 'rgba(17, 22, 41, 0.4)'
+            bgcolor: '#ffffff'
           },
           legend: {
-            font: { color: '#9ca3af', size: 9 },
+            font: { color: '#4b5563', size: 9 },
             orientation: 'h',
             y: -0.15
           },

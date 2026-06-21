@@ -65,8 +65,33 @@ class BaseMaterial(ABC):
                 i0 = curve.get("impulse_asymptote")
                 kc = curve.get("curve_constant")
                 state = curve.get("damage_state")
+                ctype = curve.get("curve_type", "Hyperbolic")
+                eq_text = curve.get("equation_text", "")
                 
-                if p0 is not None and i0 is not None and kc is not None:
+                if ctype == "Piecewise" and eq_text:
+                    try:
+                        import json
+                        pts = json.loads(eq_text)
+                        if isinstance(pts, list) and len(pts) >= 2:
+                            pts = sorted(pts, key=lambda x: x[0])
+                            i_min = pts[0][0]
+                            p_min = pts[-1][1]
+                            if impulse >= i_min:
+                                if impulse >= pts[-1][0]:
+                                    p_thresh = p_min
+                                else:
+                                    p_thresh = p_min
+                                    for idx in range(len(pts) - 1):
+                                        i1, p1 = pts[idx]
+                                        i2, p2 = pts[idx+1]
+                                        if i1 <= impulse <= i2:
+                                            p_thresh = p1 + (p2 - p1) * (impulse - i1) / (i2 - i1)
+                                            break
+                                if pressure >= p_thresh:
+                                    exceeded.append(state)
+                    except Exception:
+                        pass
+                elif p0 is not None and i0 is not None and kc is not None:
                     # Check if actual point exceeds this hyperbolic curve
                     if impulse > i0 and pressure > p0:
                         if pressure >= p0 + kc / (impulse - i0):

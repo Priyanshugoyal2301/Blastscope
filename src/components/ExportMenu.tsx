@@ -13,7 +13,7 @@ export default function ExportMenu() {
     <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '8px' }}>
       <div className="glass-panel" style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
         <div>
-          <h4 style={{ fontSize: '0.88rem', fontWeight: 600, color: '#fff' }}>Publication Exports</h4>
+          <h4 style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-main)' }}>Publication Exports</h4>
           <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Generate vector graphics and tabulations</span>
         </div>
 

@@ -14,7 +14,7 @@ function VulnBar({ score }: { score: number }) {
   const color = score > 0.7 ? '#ef4444' : score > 0.5 ? '#f97316' : score > 0.3 ? '#fbbf24' : '#10b981';
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-      <div style={{ flex: 1, height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px' }}>
+      <div style={{ flex: 1, height: '6px', background: 'rgba(0,0,0,0.08)', borderRadius: '3px' }}>
         <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: '3px', transition: 'width 0.5s ease' }} />
       </div>
       <span style={{ fontSize: '0.72rem', fontFamily: 'JetBrains Mono', color, minWidth: '32px' }}>{score.toFixed(3)}</span>
@@ -35,7 +35,7 @@ export default function RiskContourPanel({ rankings, chargeKg, explosiveName }: 
     <div className="glass-panel" style={{ padding: '0' }}>
       {/* Header */}
       <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-color)' }}>
-        <h3 style={{ fontSize: '0.95rem', color: '#fff', margin: 0 }}>
+        <h3 style={{ fontSize: '0.95rem', color: 'var(--text-main)', margin: 0 }}>
           Vulnerability Rankings
         </h3>
         {(chargeKg || explosiveName) && (
@@ -49,7 +49,7 @@ export default function RiskContourPanel({ rankings, chargeKg, explosiveName }: 
       {/* Table */}
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
         <thead>
-          <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+          <tr style={{ background: 'rgba(0,0,0,0.02)' }}>
             <th style={{ padding: '10px 14px', color: 'var(--text-muted)', textAlign: 'left', fontWeight: 600 }}>#</th>
             <th style={{ padding: '10px 14px', color: 'var(--text-muted)', textAlign: 'left', fontWeight: 600 }}>Material</th>
             <th style={{ padding: '10px 14px', color: 'var(--text-muted)', textAlign: 'left', fontWeight: 600, minWidth: '120px' }}>Vuln. Score</th>
@@ -81,7 +81,7 @@ export default function RiskContourPanel({ rankings, chargeKg, explosiveName }: 
                   </span>
                 </td>
                 <td style={{ padding: '12px 14px' }}>
-                  <div style={{ fontWeight: 600, color: '#e2e8f0' }}>{r.profile_name}</div>
+                  <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{r.profile_name}</div>
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{r.family}</div>
                 </td>
                 <td style={{ padding: '12px 14px', minWidth: '130px' }}>

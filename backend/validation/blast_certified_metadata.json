@@ -1,0 +1,145 @@
+{
+    "dataset_info": {
+        "dataset_name": "BlastScope Certified Forward Physics Dataset",
+        "description": "Certified blast parameter dataset for surrogate-model training, generated via log-uniform sampling of scaled distance Z and charge weight W.",
+        "total_samples": 100000,
+        "applicable_range": {
+            "scaled_distance_Z": "0.05 to 40.0 m/kg^(1/3)",
+            "charge_weight_W": "0.1 to 10000.0 kg"
+        }
+    },
+    "environmental_constants": {
+        "ambient_pressure_kPa": 101.325,
+        "speed_of_sound_m_s": 340.292
+    },
+    "fields": {
+        "sample_id": {
+            "equation": "N/A",
+            "source_document": "N/A",
+            "page": "N/A",
+            "table": "N/A",
+            "units": "dimensionless",
+            "validity_range": "1 to 100000"
+        },
+        "burst_type": {
+            "equation": "N/A",
+            "source_document": "N/A",
+            "page": "N/A",
+            "table": "N/A",
+            "units": "categorical",
+            "validity_range": "Surface, Free Air"
+        },
+        "charge_weight_kg": {
+            "equation": "N/A",
+            "source_document": "N/A",
+            "page": "N/A",
+            "table": "N/A",
+            "units": "kg",
+            "validity_range": "0.1 to 10000.0"
+        },
+        "standoff_distance_m": {
+            "equation": "R = Z * W^(1/3)",
+            "source_document": "UFC 3-340-02",
+            "page": "Chapter 2",
+            "table": "N/A",
+            "units": "m",
+            "validity_range": "Dependent on W and Z"
+        },
+        "scaled_distance_m_kg13": {
+            "equation": "Z = R / W^(1/3)",
+            "source_document": "UFC 3-340-02",
+            "page": "Chapter 2",
+            "table": "N/A",
+            "units": "m/kg^(1/3)",
+            "validity_range": "0.05 to 40.0"
+        },
+        "incident_pressure_kPa": {
+            "equation": "Y = exp(A + B*ln(Z) + ...) [Surface], Y = 10^(sum(C_i * u^i)) [Free Air]",
+            "source_document": "Swisdak (1994) [Surface], ARL-TR-1310 [Free Air]",
+            "page": "Page 12 [Surface], Appendix A [Free Air]",
+            "table": "Table 1 [Surface], conwep-brl [Free Air]",
+            "units": "kPa",
+            "validity_range": "Z >= 0.20 [Surface], Z >= 0.0587 [Free Air]"
+        },
+        "reflected_pressure_kPa": {
+            "equation": "Y = exp(A + B*ln(Z) + ...) [Surface], Y = 10^(sum(C_i * u^i)) [Free Air]",
+            "source_document": "Swisdak (1994) [Surface], ARL-TR-1310 [Free Air]",
+            "page": "Page 12 [Surface], Appendix A [Free Air]",
+            "table": "Table 1 [Surface], conwep-pref [Free Air]",
+            "units": "kPa",
+            "validity_range": "Z >= 0.06 [Surface], Z >= 0.0587 [Free Air]"
+        },
+        "dynamic_pressure_kPa": {
+            "equation": "Q = 2.5 * Pso^2 / (7 * P0 + Pso)",
+            "source_document": "UFC 3-340-02",
+            "page": "Eq. 2-4",
+            "table": "N/A",
+            "units": "kPa",
+            "validity_range": "Derived from incident_pressure"
+        },
+        "incident_impulse_scaled_kPa_ms": {
+            "equation": "Y = exp(A + B*ln(Z) + ...) [Surface], Y = 10^(sum(C_i * u^i)) [Free Air]",
+            "source_document": "Swisdak (1994) [Surface], ARL-TR-1310 [Free Air]",
+            "page": "Page 12 [Surface], Appendix A [Free Air]",
+            "table": "Table 1 [Surface], conwep-ximps [Free Air]",
+            "units": "kPa-ms/kg^(1/3)",
+            "validity_range": "Z >= 0.20 [Surface], Z >= 0.0587 [Free Air]"
+        },
+        "reflected_impulse_scaled_kPa_ms": {
+            "equation": "Y = exp(A + B*ln(Z) + ...) [Surface], Y = 10^(sum(C_i * u^i)) [Free Air]",
+            "source_document": "Swisdak (1994) [Surface], ARL-TR-1310 [Free Air]",
+            "page": "Page 12 [Surface], Appendix A [Free Air]",
+            "table": "Table 1 [Surface], conwep-ximpr [Free Air]",
+            "units": "kPa-ms/kg^(1/3)",
+            "validity_range": "Z >= 0.06 [Surface], Z >= 0.0587 [Free Air]"
+        },
+        "positive_duration_scaled_ms": {
+            "equation": "Y = exp(A + B*ln(Z) + ...) [Surface], Y = 10^(sum(C_i * u^i)) [Free Air]",
+            "source_document": "Swisdak (1994) [Surface], ARL-TR-1310 [Free Air]",
+            "page": "Page 12 [Surface], Appendix A [Free Air]",
+            "table": "Table 1 [Surface], conwepjtdur [Free Air]",
+            "units": "ms/kg^(1/3)",
+            "validity_range": "Z >= 0.20 [Surface], Z >= 0.0587 [Free Air]"
+        },
+        "negative_duration_scaled_ms": {
+            "equation": "td- = td * (1 + 1/b)",
+            "source_document": "UFC 3-340-02 / Standard Physics",
+            "page": "Chapter 2",
+            "table": "N/A",
+            "units": "ms/kg^(1/3)",
+            "validity_range": "Derived from positive_duration and decay_parameter"
+        },
+        "arrival_time_scaled_ms": {
+            "equation": "Y = exp(A + B*ln(Z) + ...) [Surface], Y = 10^(sum(C_i * u^i)) [Free Air]",
+            "source_document": "Swisdak (1994) [Surface], ARL-TR-1310 [Free Air]",
+            "page": "Page 12 [Surface], Appendix A [Free Air]",
+            "table": "Table 1 [Surface], conwep-tarr [Free Air]",
+            "units": "ms/kg^(1/3)",
+            "validity_range": "Z >= 0.06 [Surface], Z >= 0.0587 [Free Air]"
+        },
+        "shock_front_velocity_m_s": {
+            "equation": "U = C0 * sqrt(1 + 6 * Pso / (7 * P0))",
+            "source_document": "UFC 3-340-02",
+            "page": "Eq. 2-2",
+            "table": "N/A",
+            "units": "m/s",
+            "validity_range": "Derived from incident_pressure"
+        },
+        "particle_velocity_m_s": {
+            "equation": "up = 5 * C0 * Pso / (7 * P0 * sqrt(1 + 6 * Pso / (7 * P0)))",
+            "source_document": "UFC 3-340-02",
+            "page": "Eq. 2-3",
+            "table": "N/A",
+            "units": "m/s",
+            "validity_range": "Derived from incident_pressure"
+        },
+        "decay_parameter": {
+            "equation": "is / (Pso * td) = (b - 1 + e^-b) / b^2",
+            "source_document": "UFC 3-340-02 / Standard Physics",
+            "page": "Chapter 2",
+            "table": "N/A",
+            "units": "dimensionless",
+            "validity_range": "Numerical solver output"
+        }
+    }
+}

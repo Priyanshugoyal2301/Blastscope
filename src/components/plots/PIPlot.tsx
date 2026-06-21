@@ -127,16 +127,14 @@ export default function PIPlot({ activeResults, profiles }: PIPlotProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '10px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h4 style={{ margin: 0, fontSize: '0.9rem', color: '#fff' }}>
+        <h4 style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-main)' }}>
           P-I Diagram ({isFacade ? 'Reflected Loading' : 'Incident Loading'})
         </h4>
         <select
           value={selectedProfileId}
           onChange={(e) => setSelectedProfileId(Number(e.target.value))}
+          className="form-input"
           style={{
-            background: '#0b0f19',
-            border: '1px solid var(--border-color)',
-            color: '#fff',
             fontSize: '0.8rem',
             padding: '4px 8px',
             borderRadius: '3px',
@@ -156,28 +154,28 @@ export default function PIPlot({ activeResults, profiles }: PIPlotProps) {
           data={dataTraces}
           layout={{
             paper_bgcolor: 'rgba(0,0,0,0)',
-            plot_bgcolor: 'rgba(17, 22, 41, 0.4)',
+            plot_bgcolor: '#ffffff',
             margin: { t: 10, b: 45, l: 55, r: 20 },
             xaxis: {
               title: 'Impulse (kPa-ms)',
-              titlefont: { color: '#9ca3af', size: 11 },
-              tickfont: { color: '#9ca3af', size: 10 },
-              gridcolor: 'rgba(255, 255, 255, 0.05)',
-              zerolinecolor: 'rgba(255, 255, 255, 0.1)',
+              titlefont: { color: '#4b5563', size: 11 },
+              tickfont: { color: '#4b5563', size: 10 },
+              gridcolor: '#e5e7eb',
+              zerolinecolor: '#d1d5db',
               type: 'log',
               range: [0, 4.5], // 10^0 = 1 to 10^4.5 = 31,600
             },
             yaxis: {
               title: 'Overpressure (kPa)',
-              titlefont: { color: '#9ca3af', size: 11 },
-              tickfont: { color: '#9ca3af', size: 10 },
-              gridcolor: 'rgba(255, 255, 255, 0.05)',
-              zerolinecolor: 'rgba(255, 255, 255, 0.1)',
+              titlefont: { color: '#4b5563', size: 11 },
+              tickfont: { color: '#4b5563', size: 10 },
+              gridcolor: '#e5e7eb',
+              zerolinecolor: '#d1d5db',
               type: 'log',
               range: [0, 4.5],
             },
             legend: {
-              font: { color: '#9ca3af', size: 9 },
+              font: { color: '#4b5563', size: 9 },
               orientation: 'h',
               y: -0.15,
             },
@@ -194,7 +192,7 @@ export default function PIPlot({ activeResults, profiles }: PIPlotProps) {
           fontSize: '0.75rem',
           color: 'var(--text-muted)',
           padding: '6px 10px',
-          background: 'rgba(255, 255, 255, 0.02)',
+          background: 'rgba(0,0,0,0.02)',
           borderLeft: '2px solid var(--primary)',
         }}
       >
@@ -203,7 +201,7 @@ export default function PIPlot({ activeResults, profiles }: PIPlotProps) {
         ) : envelopes.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
             <div><strong>Active Capacity Envelopes:</strong> Derived hyperbolas <code>(P-P0)(I-I0) = Kc</code></div>
-            <div style={{ fontSize: '0.7rem', color: '#9ca3af' }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
               {envelopes.map(e => `${e.damage_state}: ${e.confidence_level} Confidence`).join(' | ')}
             </div>
           </div>

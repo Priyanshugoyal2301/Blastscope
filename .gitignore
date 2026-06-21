@@ -28,4 +28,20 @@ Thumbs.db
 # Build artifacts
 *.tsbuildinfo
 dist-package/
+build-solver/
+catboost_info/
+playwright-report/
+test-results/
+extracted_pages/
+kb_source_temp/
+brain/
+logs/
+
+# Data and PDFs
+*.csv
+*.pdf
+*.txt
+*.whl
+*.joblib
+
 

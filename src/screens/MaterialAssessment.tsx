@@ -44,7 +44,7 @@ export default function MaterialAssessmentScreen({ activeScenario, assessments }
     else if (level === 'Severe' || level === 'Failure') color = '#ef4444';
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <div style={{ flex: 1, height: '5px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px' }}>
+        <div style={{ flex: 1, height: '5px', background: 'rgba(0,0,0,0.08)', borderRadius: '2px' }}>
           <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: '2px', transition: 'width 0.4s' }} />
         </div>
         <span style={{ fontSize: '0.75rem', fontFamily: 'JetBrains Mono', color, minWidth: '30px' }}>
@@ -59,9 +59,9 @@ export default function MaterialAssessmentScreen({ activeScenario, assessments }
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-fade-in">
       <div className="glass-panel" style={{ padding: '20px' }}>
-        <h2 style={{ fontSize: '1.2rem', color: '#fff' }}>Material Damage Assessment</h2>
+        <h2 style={{ fontSize: '1.2rem', color: 'var(--text-main)' }}>Material Damage Assessment</h2>
         <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-          Progressive physical response assessment for <strong style={{ color: '#fff' }}>{activeScenario.name}</strong>.
+          Progressive physical response assessment for <strong style={{ color: 'var(--text-main)' }}>{activeScenario.name}</strong>.
           Material models return physics-grounded damage states with severity scores and confidence ratings.
         </p>
       </div>
@@ -70,7 +70,7 @@ export default function MaterialAssessmentScreen({ activeScenario, assessments }
       <div className="glass-panel" style={{ overflow: 'auto', padding: 0 }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.82rem' }}>
           <thead>
-            <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'rgba(255, 255, 255, 0.02)' }}>
+            <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'rgba(0, 0, 0, 0.02)' }}>
               <th style={{ padding: '14px 16px', fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>Material Target</th>
               <th style={{ padding: '14px 16px', fontWeight: 600, color: 'var(--text-muted)' }}>Family</th>
               <th style={{ padding: '14px 16px', fontWeight: 600, color: 'var(--text-muted)' }}>Level</th>
@@ -94,11 +94,11 @@ export default function MaterialAssessmentScreen({ activeScenario, assessments }
                   key={ass.profile_id} 
                   style={{ 
                     borderBottom: '1px solid var(--border-color)',
-                    background: isDanger ? 'rgba(239, 68, 68, 0.01)' : 'transparent',
+                    background: isDanger ? 'rgba(239, 68, 68, 0.02)' : 'transparent',
                     transition: 'all 0.2s'
                   }}
                 >
-                  <td style={{ padding: '14px 16px', fontWeight: 600, color: '#fff', whiteSpace: 'nowrap' }}>
+                  <td style={{ padding: '14px 16px', fontWeight: 600, color: 'var(--text-main)', whiteSpace: 'nowrap' }}>
                     {ass.profile_name}
                   </td>
                   <td style={{ padding: '14px 16px', color: 'var(--text-muted)' }}>
@@ -109,7 +109,7 @@ export default function MaterialAssessmentScreen({ activeScenario, assessments }
                       {ass.damage_level}
                     </span>
                   </td>
-                  <td style={{ padding: '14px 16px', color: '#e2e8f0', fontWeight: 500 }}>
+                  <td style={{ padding: '14px 16px', color: 'var(--text-main)', fontWeight: 500 }}>
                     {ass.damage_state || ass.damage_level}
                   </td>
                   <td style={{ padding: '14px 16px', minWidth: '150px' }}>

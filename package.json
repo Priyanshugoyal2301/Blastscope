@@ -8,8 +8,12 @@
     "dev:vite": "vite",
     "dev:electron": "tsc -p tsconfig.electron.json && electron .",
     "build": "tsc && vite build && tsc -p tsconfig.electron.json",
+    "build:solver": "node scripts/build-solver.js",
     "start": "electron .",
     "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac",
+    "dist:linux": "electron-builder --linux",
+    "dist:all": "electron-builder -wml",
     "pack": "electron-builder --dir"
   },
   "dependencies": {
@@ -20,6 +24,7 @@
     "react-plotly.js": "^2.6.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@types/node": "^20.11.0",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
@@ -42,10 +47,32 @@
         "nsis"
       ]
     },
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "linux": {
+      "category": "Development",
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    },
     "files": [
       "dist/**/*",
-      "dist-electron/**/*",
-      "backend/**/*"
+      "dist-electron/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "backend-dist/blastscope-solver",
+        "to": "backend-dist/blastscope-solver",
+        "filter": [
+          "**/*"
+        ]
+      }
     ]
   }
 }

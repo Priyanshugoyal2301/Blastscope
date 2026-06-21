@@ -38,19 +38,19 @@ export default function BlastResultsScreen({ activeScenario, results }: BlastRes
       {/* Overview Card */}
       <div className="glass-panel" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h2 style={{ fontSize: '1.2rem', color: '#fff' }}>Calculated Wave Environment</h2>
+          <h2 style={{ fontSize: '1.2rem', color: 'var(--text-main)' }}>Calculated Wave Environment</h2>
           <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-            Scenario: <strong style={{ color: '#fff' }}>{activeScenario.name}</strong> ({activeScenario.charge_weight} kg equivalent)
+            Scenario: <strong style={{ color: 'var(--text-main)' }}>{activeScenario.name}</strong> ({activeScenario.charge_weight} kg equivalent)
           </p>
         </div>
 
         {/* Model Provenance */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.2)', padding: '8px 14px', borderRadius: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(37, 99, 235, 0.08)', border: '1px solid rgba(37, 99, 235, 0.15)', padding: '8px 14px', borderRadius: '8px' }}>
           <Shield size={16} style={{ color: 'var(--primary)' }} />
           <div style={{ textAlign: 'left' }}>
             <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 500 }}>Provenance Model</div>
-            <div style={{ fontSize: '0.82rem', color: '#fff', fontWeight: 600 }}>
-              {results.model_used} <span style={{ color: 'var(--accent)', fontSize: '0.75rem' }}>{results.model_version}</span>
+            <div style={{ fontSize: '0.82rem', color: 'var(--text-main)', fontWeight: 600 }}>
+              {results.model_used} <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{results.model_version}</span>
             </div>
           </div>
         </div>
@@ -64,7 +64,7 @@ export default function BlastResultsScreen({ activeScenario, results }: BlastRes
               {card.label}
             </span>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', margin: '4px 0' }}>
-              <span style={{ fontSize: '1.8rem', fontWeight: 700, color: '#fff', fontFamily: 'Outfit' }}>
+              <span style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--text-main)', fontFamily: 'Outfit' }}>
                 {card.value}
               </span>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>

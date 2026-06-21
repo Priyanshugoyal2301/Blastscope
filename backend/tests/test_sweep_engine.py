@@ -235,3 +235,27 @@ def test_material_ranker_glass_vs_rc():
         f"Glass should be ranked more vulnerable (lower rank #) than RC. "
         f"Got Glass={glass_rank}, RC={rc_rank}"
     )
+
+# --------------------------------------------------------------------------
+# 8. Point Limit Boundary Enforcement (10,000 limit)
+# --------------------------------------------------------------------------
+
+def test_grid_sweep_point_limit_boundaries():
+    """
+    Assert that 9,999 and 10,000 points pass _check_limit,
+    while 10,001 points is blocked and raises ValueError.
+    """
+    from backend.studies.batch_runner import _check_limit
+
+    # 9,999 points -> Success (no exception raised)
+    _check_limit(9999)
+
+    # 10,000 points -> Success
+    _check_limit(10000)
+
+    # 10,001 points -> ValueError
+    with pytest.raises(ValueError) as excinfo:
+        _check_limit(10001)
+    
+    assert "exceeds the hard limit of 10,000" in str(excinfo.value)
+

@@ -70,6 +70,9 @@ export interface BlastResults {
   arrival_time: number;
   model_used: string;
   model_version: string;
+  shock_front_velocity?: number;
+  particle_velocity?: number;
+  decay_parameter?: number;
 }
 
 export interface DamageAssessment {

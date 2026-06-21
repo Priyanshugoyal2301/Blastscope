@@ -36,13 +36,55 @@ class DamageEngine:
         Returns:
             list: Assessments records matching schema output.
         """
+        import math
         assessments = []
+        
+        # Read optional parameters from blast_results or defaults
+        angle = float(blast_results.get("angle_of_incidence", 0.0))
+        angle_rad = math.radians(angle)
+        
+        # Default facade dimensions for clearing calculations
+        H = 3.0  # m
+        W = 4.0  # m
+        S = min(H, W / 2.0)  # clearing distance = 2.0 m
+        P0 = 101.325  # ambient pressure (kPa)
         
         for prof in profiles_data:
             # Facade elements experience Reflected overpressure loading, others experience Incident
             is_facade = prof["family"] in ["Glass", "Masonry"]
-            P_actual = blast_results["reflected_pressure"] if is_facade else blast_results["incident_pressure"]
-            I_actual = blast_results["positive_impulse"]
+            
+            if is_facade:
+                P_incident = blast_results["incident_pressure"]
+                P_reflected = blast_results["reflected_pressure"]
+                I_incident = blast_results["positive_impulse"]
+                I_reflected = blast_results.get("reflected_impulse", I_incident)
+                
+                # 1. Adjust for angle of incidence (obliquity)
+                cos2 = (math.cos(angle_rad)) ** 2
+                P_adj = P_incident + (P_reflected - P_incident) * cos2
+                I_adj = I_incident + (I_reflected - I_incident) * cos2
+                
+                # 2. Adjust for clearing effects
+                c0 = 0.340  # speed of sound (m/ms)
+                term = 1.0 + (6.0 * P_incident) / (7.0 * P0)
+                U_shock = c0 * math.sqrt(max(0.1, term))
+                
+                t_c = (3.0 * S) / U_shock if U_shock > 0 else 9999.0
+                t_d = blast_results.get("positive_duration", 10.0)
+                
+                Q_so = blast_results.get("dynamic_pressure", 0.0)
+                P_stag = P_incident + Q_so  # stagnation pressure Cd = 1.0
+                
+                if t_c < t_d:
+                    I_cleared = P_adj * (t_c / 2.0) + P_stag * ((t_d - t_c) / 2.0)
+                    I_actual = min(I_adj, I_cleared)
+                else:
+                    I_actual = I_adj
+                
+                P_actual = P_adj
+            else:
+                P_actual = blast_results["incident_pressure"]
+                I_actual = blast_results["positive_impulse"]
             
             thresholds = {
                 "minor_pressure": prof.get("minor_pressure"),

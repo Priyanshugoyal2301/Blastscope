@@ -1,0 +1,10 @@
+{
+  "W_R2_Log": 0.999974,
+  "Z_R2_Log": 0.999981,
+  "pca_cum_var_3": 99.714350,
+  "KS_Max_Stat": 0.055449,
+  "Top_SHAP_W_1": "log_positive_duration",
+  "Top_SHAP_Z_1": "log_incident_pressure",
+  "W_Extrap_R2": -3.619953,
+  "Z_Extrap_R2": -2.143349
+}

@@ -46,8 +46,8 @@ export default function Documentation() {
                 border: '1px solid',
                 borderColor: isActive ? 'var(--primary)' : 'transparent',
                 borderRadius: '6px',
-                background: isActive ? 'rgba(59, 130, 246, 0.12)' : 'transparent',
-                color: isActive ? '#fff' : 'var(--text-muted)',
+                background: isActive ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
+                color: isActive ? 'var(--primary)' : 'var(--text-muted)',
                 textAlign: 'left',
                 fontSize: '0.85rem',
                 fontWeight: isActive ? 600 : 500,
@@ -66,7 +66,7 @@ export default function Documentation() {
       <div className="glass-panel" style={{ flex: 1, padding: '24px', overflowY: 'auto', background: 'var(--bg-card)' }}>
         {activeTab === 'getting-started' && (
           <div>
-            <h2 style={{ fontSize: '1.4rem', color: '#fff', marginBottom: '14px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
+            <h2 style={{ fontSize: '1.4rem', color: 'var(--text-main)', marginBottom: '14px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
               1. Getting Started
             </h2>
             <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '12px' }}>
@@ -74,7 +74,7 @@ export default function Documentation() {
               designed to simulate blast wave dynamics, evaluate material responses under explosive loading, 
               and perform comparative validation studies.
             </p>
-            <h3 style={{ fontSize: '1.05rem', color: '#fff', margin: '18px 0 8px' }}>Core Workflow:</h3>
+            <h3 style={{ fontSize: '1.05rem', color: 'var(--text-main)', margin: '18px 0 8px' }}>Core Workflow:</h3>
             <ol style={{ paddingLeft: '20px', fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: '1.7' }}>
               <li>Configure and save a threat **Scenario** (charge weight, standoff distance, and burst type).</li>
               <li>Examine pressure, duration, and impulse outcomes under the **Blast Results** tab.</li>
@@ -87,7 +87,7 @@ export default function Documentation() {
 
         {activeTab === 'physics' && (
           <div>
-            <h2 style={{ fontSize: '1.4rem', color: '#fff', marginBottom: '14px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
+            <h2 style={{ fontSize: '1.4rem', color: 'var(--text-main)', marginBottom: '14px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
               2. Blast Physics & Wave Formulation
             </h2>
             <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '14px' }}>
@@ -95,29 +95,29 @@ export default function Documentation() {
               representing Kingery-Bulmash (1984) graphical datasets.
             </p>
 
-            <h3 style={{ fontSize: '1.05rem', color: '#fff', margin: '14px 0 6px' }}>TNT Equivalency</h3>
+            <h3 style={{ fontSize: '1.05rem', color: 'var(--text-main)', margin: '14px 0 6px' }}>TNT Equivalency</h3>
             <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '12px' }}>
               Non-TNT solid high-explosives are scaled using pressure and impulse equivalence factors:
             </p>
-            <div style={{ padding: '10px 14px', background: 'rgba(0,0,0,0.2)', borderLeft: '3px solid var(--primary)', borderRadius: '4px', margin: '10px 0', fontFamily: 'JetBrains Mono', fontSize: '0.8rem' }}>
+            <div style={{ padding: '10px 14px', background: 'rgba(0,0,0,0.03)', borderLeft: '3px solid var(--primary)', borderRadius: '4px', margin: '10px 0', fontFamily: 'JetBrains Mono', fontSize: '0.8rem', color: 'var(--text-main)' }}>
               W_p = W_actual * pressure_equivalency<br />
               W_i = W_actual * impulse_equivalency
             </div>
 
-            <h3 style={{ fontSize: '1.05rem', color: '#fff', margin: '14px 0 6px' }}>Scaled Distance (Standoff)</h3>
+            <h3 style={{ fontSize: '1.05rem', color: 'var(--text-main)', margin: '14px 0 6px' }}>Scaled Distance (Standoff)</h3>
             <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '12px' }}>
               Calculations are computed relative to scaled standoff coordinates Z_p (pressure) and Z_i (impulse):
             </p>
-            <div style={{ padding: '10px 14px', background: 'rgba(0,0,0,0.2)', borderLeft: '3px solid var(--primary)', borderRadius: '4px', margin: '10px 0', fontFamily: 'JetBrains Mono', fontSize: '0.8rem' }}>
+            <div style={{ padding: '10px 14px', background: 'rgba(0,0,0,0.03)', borderLeft: '3px solid var(--primary)', borderRadius: '4px', margin: '10px 0', fontFamily: 'JetBrains Mono', fontSize: '0.8rem', color: 'var(--text-main)' }}>
               Z_p = R / W_p^(1/3)<br />
               Z_i = R / W_i^(1/3)
             </div>
 
-            <h3 style={{ fontSize: '1.05rem', color: '#fff', margin: '14px 0 6px' }}>Dynamic Pressure</h3>
+            <h3 style={{ fontSize: '1.05rem', color: 'var(--text-main)', margin: '14px 0 6px' }}>Dynamic Pressure</h3>
             <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: '1.6' }}>
               Calculated using the peak incident pressure P_so and the ratio of specific heats of air:
             </p>
-            <div style={{ padding: '10px 14px', background: 'rgba(0,0,0,0.2)', borderLeft: '3px solid var(--primary)', borderRadius: '4px', margin: '10px 0', fontFamily: 'JetBrains Mono', fontSize: '0.8rem' }}>
+            <div style={{ padding: '10px 14px', background: 'rgba(0,0,0,0.03)', borderLeft: '3px solid var(--primary)', borderRadius: '4px', margin: '10px 0', fontFamily: 'JetBrains Mono', fontSize: '0.8rem', color: 'var(--text-main)' }}>
               Q_0 = (5/2) * P_so^2 / (7 * P_atm + P_so)
             </div>
           </div>
@@ -125,7 +125,7 @@ export default function Documentation() {
 
         {activeTab === 'materials' && (
           <div>
-            <h2 style={{ fontSize: '1.4rem', color: '#fff', marginBottom: '14px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
+            <h2 style={{ fontSize: '1.4rem', color: 'var(--text-main)', marginBottom: '14px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
               3. Material Response Models
             </h2>
             <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '14px' }}>
@@ -135,34 +135,34 @@ export default function Documentation() {
 
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left', marginBottom: '14px' }}>
               <thead>
-                <tr style={{ borderBottom: '1px solid var(--border-color)', color: '#fff' }}>
+                <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-main)' }}>
                   <th style={{ padding: '8px' }}>Family</th>
                   <th style={{ padding: '8px' }}>Governing Failure Mechanism</th>
                   <th style={{ padding: '8px' }}>Mechanical Limit</th>
                 </tr>
               </thead>
               <tbody>
-                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '8px', fontWeight: 'bold' }}>Glass</td>
                   <td style={{ padding: '8px', color: 'var(--text-muted)' }}>Fracture / Interlayer tearing</td>
                   <td style={{ padding: '8px', color: 'var(--text-muted)' }}>Tensile flexural limit</td>
                 </tr>
-                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '8px', fontWeight: 'bold' }}>Masonry</td>
                   <td style={{ padding: '8px', color: 'var(--text-muted)' }}>Three-hinge flexural collapse</td>
                   <td style={{ padding: '8px', color: 'var(--text-muted)' }}>Flexural tension / bond failure</td>
                 </tr>
-                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '8px', fontWeight: 'bold' }}>Concrete (RC)</td>
                   <td style={{ padding: '8px', color: 'var(--text-muted)' }}>Rear-face concrete spalling</td>
                   <td style={{ padding: '8px', color: 'var(--text-muted)' }}>Concrete dynamic tensile spall</td>
                 </tr>
-                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '8px', fontWeight: 'bold' }}>UHPC</td>
                   <td style={{ padding: '8px', color: 'var(--text-muted)' }}>Steel micro-fiber pullout</td>
                   <td style={{ padding: '8px', color: 'var(--text-muted)' }}>Localized high shear capacity</td>
                 </tr>
-                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '8px', fontWeight: 'bold' }}>Steel</td>
                   <td style={{ padding: '8px', color: 'var(--text-muted)' }}>Ductile yielding / boundary tear</td>
                   <td style={{ padding: '8px', color: 'var(--text-muted)' }}>Plastic membrane tension limit</td>
@@ -174,7 +174,7 @@ export default function Documentation() {
 
         {activeTab === 'pi-envelopes' && (
           <div>
-            <h2 style={{ fontSize: '1.4rem', color: '#fff', marginBottom: '14px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
+            <h2 style={{ fontSize: '1.4rem', color: 'var(--text-main)', marginBottom: '14px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
               4. Pressure-Impulse (P-I) Envelopes
             </h2>
             <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '12px' }}>
@@ -182,7 +182,7 @@ export default function Documentation() {
               The solver constructs progressive capacity curves (Minor, Moderate, Severe, and Failure) 
               using the hyperbolic equation:
             </p>
-            <div style={{ padding: '10px 14px', background: 'rgba(0,0,0,0.2)', borderLeft: '3px solid var(--primary)', borderRadius: '4px', margin: '10px 0', fontFamily: 'JetBrains Mono', fontSize: '0.85rem' }}>
+            <div style={{ padding: '10px 14px', background: 'rgba(0,0,0,0.03)', borderLeft: '3px solid var(--primary)', borderRadius: '4px', margin: '10px 0', fontFamily: 'JetBrains Mono', fontSize: '0.85rem', color: 'var(--text-main)' }}>
               (P - P_0) * (I - I_0) = K_c
             </div>
             <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: '1.6' }}>
@@ -198,7 +198,7 @@ export default function Documentation() {
 
         {activeTab === 'validation' && (
           <div>
-            <h2 style={{ fontSize: '1.4rem', color: '#fff', marginBottom: '14px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
+            <h2 style={{ fontSize: '1.4rem', color: 'var(--text-main)', marginBottom: '14px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
               5. Validation Methodology
             </h2>
             <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '12px' }}>
@@ -219,7 +219,7 @@ export default function Documentation() {
 
         {activeTab === 'parametric' && (
           <div>
-            <h2 style={{ fontSize: '1.4rem', color: '#fff', marginBottom: '14px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
+            <h2 style={{ fontSize: '1.4rem', color: 'var(--text-main)', marginBottom: '14px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
               6. Parametric Studies & point Limits
             </h2>
             <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '12px' }}>
@@ -231,7 +231,7 @@ export default function Documentation() {
               <li><strong>Explosive Comparison</strong>: Compare pressure/severity contours across agents (ANFO, C4, RDX).</li>
               <li><strong>Grid Study</strong>: Generate 2D threat contours mapping damage index gradients.</li>
             </ul>
-            <h3 style={{ fontSize: '1.05rem', color: '#fff', margin: '14px 0 6px' }}>Safety Controls</h3>
+            <h3 style={{ fontSize: '1.05rem', color: 'var(--text-main)', margin: '14px 0 6px' }}>Safety Controls</h3>
             <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: '1.6' }}>
               To ensure Electron remains highly responsive, point counts are capped:
               <ul style={{ paddingLeft: '20px', marginTop: '6px' }}>
@@ -246,7 +246,7 @@ export default function Documentation() {
 
         {activeTab === 'exports' && (
           <div>
-            <h2 style={{ fontSize: '1.4rem', color: '#fff', marginBottom: '14px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
+            <h2 style={{ fontSize: '1.4rem', color: 'var(--text-main)', marginBottom: '14px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
               7. Exporting Results
             </h2>
             <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '12px' }}>
@@ -262,7 +262,7 @@ export default function Documentation() {
 
         {activeTab === 'references' && (
           <div>
-            <h2 style={{ fontSize: '1.4rem', color: '#fff', marginBottom: '14px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
+            <h2 style={{ fontSize: '1.4rem', color: 'var(--text-main)', marginBottom: '14px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
               8. Bibliographic References
             </h2>
             <ul style={{ paddingLeft: '20px', fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.8' }}>

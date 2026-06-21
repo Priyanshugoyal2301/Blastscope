@@ -137,28 +137,28 @@ export default function BlastCurvePlot({ x, incidentY, reflectedY, title }: Blas
         layout={{
           title: {
             text: title || 'Blast Overpressure vs. Distance',
-            font: { color: '#ffffff', family: 'Inter', size: 14 }
+            font: { color: '#1f2937', family: 'Inter', size: 14 }
           },
           paper_bgcolor: 'rgba(0,0,0,0)',
-          plot_bgcolor: 'rgba(17, 22, 41, 0.4)',
+          plot_bgcolor: '#ffffff',
           margin: { t: 40, b: 50, l: 60, r: 20 },
           xaxis: {
             title: 'Standoff Distance R (m)',
-            titlefont: { color: '#9ca3af', size: 11 },
-            tickfont: { color: '#9ca3af', size: 10 },
-            gridcolor: 'rgba(255, 255, 255, 0.05)',
-            zerolinecolor: 'rgba(255, 255, 255, 0.1)'
+            titlefont: { color: '#4b5563', size: 11 },
+            tickfont: { color: '#4b5563', size: 10 },
+            gridcolor: '#e5e7eb',
+            zerolinecolor: '#d1d5db'
           },
           yaxis: {
             title: 'Overpressure (kPa)',
-            titlefont: { color: '#9ca3af', size: 11 },
-            tickfont: { color: '#9ca3af', size: 10 },
-            gridcolor: 'rgba(255, 255, 255, 0.05)',
-            zerolinecolor: 'rgba(255, 255, 255, 0.1)',
+            titlefont: { color: '#4b5563', size: 11 },
+            tickfont: { color: '#4b5563', size: 10 },
+            gridcolor: '#e5e7eb',
+            zerolinecolor: '#d1d5db',
             type: 'log' // Standard log scale for blast pressure decays
           },
           legend: {
-            font: { color: '#9ca3af', size: 9 },
+            font: { color: '#4b5563', size: 9 },
             orientation: 'h',
             y: -0.25
           },

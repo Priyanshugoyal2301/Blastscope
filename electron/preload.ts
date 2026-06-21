@@ -26,8 +26,14 @@ contextBridge.exposeInMainWorld('api', {
       'studies:explosiveComparison',
       'studies:runGrid',
       'studies:exportCSV',
+      'inverse:predict',
       'database:export',
-      'database:import'
+      'database:import',
+      'test:kill-solver',
+      'test:freeze-solver',
+      'test:crash-solver',
+      'test:get-recovery-attempts',
+      'test:reset-recovery-attempts'
     ];
     
     if (validChannels.includes(channel)) {
@@ -35,5 +41,12 @@ contextBridge.exposeInMainWorld('api', {
     }
     
     return Promise.reject(new Error(`Security Block: IPC channel '${channel}' is not whitelisted in preload.`));
+  },
+  onSolverStatus: (callback: (data: any) => void) => {
+    const subscription = (_event: any, value: any) => callback(value);
+    ipcRenderer.on('solver:status', subscription);
+    return () => {
+      ipcRenderer.removeListener('solver:status', subscription);
+    };
   }
 });

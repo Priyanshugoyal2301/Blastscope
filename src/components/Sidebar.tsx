@@ -1,11 +1,11 @@
-import { Flame, ShieldAlert, BarChart3, Database, Clock, TrendingUp, Map, HelpCircle } from 'lucide-react';
+import { Flame, ShieldAlert, BarChart3, Database, Clock, TrendingUp, Map, HelpCircle, Compass } from 'lucide-react';
 import { Scenario } from '../types';
 import { api } from '../services/api';
 import { useState } from 'react';
 
 interface SidebarProps {
-  currentScreen: 'input' | 'results' | 'assessment' | 'workspace' | 'study' | 'vulnmap' | 'documentation';
-  setCurrentScreen: (screen: 'input' | 'results' | 'assessment' | 'workspace' | 'study' | 'vulnmap' | 'documentation') => void;
+  currentScreen: 'input' | 'results' | 'assessment' | 'workspace' | 'study' | 'vulnmap' | 'predict' | 'documentation';
+  setCurrentScreen: (screen: 'input' | 'results' | 'assessment' | 'workspace' | 'study' | 'vulnmap' | 'predict' | 'documentation') => void;
   activeScenario: Scenario | null;
   scenarios: Scenario[];
   onSelectScenario: (sc: Scenario) => void;
@@ -62,6 +62,7 @@ export default function Sidebar({
     { id: 'results',        label: 'Blast Results',            icon: Flame,        section: 'core' },
     { id: 'assessment',     label: 'Material Assessment',      icon: ShieldAlert,  section: 'core' },
     { id: 'workspace',      label: 'Research Workspace',       icon: BarChart3,    section: 'core' },
+    { id: 'predict',        label: 'Threat Prediction',        icon: Compass,      section: 'core' },
     { id: 'study',          label: 'Parametric Study',         icon: TrendingUp,   section: 'study' },
     { id: 'vulnmap',        label: 'Vulnerability Map',        icon: Map,          section: 'study' },
     { id: 'documentation',  label: 'Documentation',            icon: HelpCircle,   section: 'help' }
@@ -100,7 +101,7 @@ export default function Sidebar({
           BS
         </div>
         <div>
-          <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#fff' }}>BlastScope</h2>
+          <h2 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-main)' }}>BlastScope</h2>
           <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Offline Physics Platform</span>
         </div>
       </div>
@@ -120,11 +121,11 @@ export default function Sidebar({
                 display: 'flex', alignItems: 'center', gap: '12px',
                 width: '100%', padding: '10px 14px', borderRadius: '8px',
                 border: 'none',
-                background: isActive ? 'rgba(99, 102, 241, 0.12)' : 'transparent',
-                color: isActive ? '#818cf8' : 'var(--text-muted)',
+                background: isActive ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
+                color: isActive ? 'var(--primary)' : 'var(--text-muted)',
                 fontWeight: isActive ? 600 : 500, fontSize: '0.9rem',
                 cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s',
-                borderLeft: isActive ? '2px solid var(--accent)' : '2px solid transparent',
+                borderLeft: isActive ? '2px solid var(--primary)' : '2px solid transparent',
               }}
             >
               <Icon size={17} />
@@ -146,11 +147,11 @@ export default function Sidebar({
                 display: 'flex', alignItems: 'center', gap: '12px',
                 width: '100%', padding: '10px 14px', borderRadius: '8px',
                 border: 'none',
-                background: isActive ? 'rgba(16, 185, 129, 0.10)' : 'transparent',
-                color: isActive ? '#34d399' : 'var(--text-muted)',
+                background: isActive ? 'rgba(22, 163, 74, 0.08)' : 'transparent',
+                color: isActive ? 'var(--status-safe)' : 'var(--text-muted)',
                 fontWeight: isActive ? 600 : 500, fontSize: '0.9rem',
                 cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s',
-                borderLeft: isActive ? '2px solid #34d399' : '2px solid transparent',
+                borderLeft: isActive ? '2px solid var(--status-safe)' : '2px solid transparent',
               }}
             >
               <Icon size={17} />
@@ -171,11 +172,11 @@ export default function Sidebar({
                 display: 'flex', alignItems: 'center', gap: '12px',
                 width: '100%', padding: '10px 14px', borderRadius: '8px',
                 border: 'none',
-                background: isActive ? 'rgba(99, 102, 241, 0.12)' : 'transparent',
-                color: isActive ? '#818cf8' : 'var(--text-muted)',
+                background: isActive ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
+                color: isActive ? 'var(--primary)' : 'var(--text-muted)',
                 fontWeight: isActive ? 600 : 500, fontSize: '0.9rem',
                 cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s',
-                borderLeft: isActive ? '2px solid var(--accent)' : '2px solid transparent',
+                borderLeft: isActive ? '2px solid var(--primary)' : '2px solid transparent',
               }}
             >
               <Icon size={17} />
@@ -230,15 +231,15 @@ export default function Sidebar({
                   padding: '10px 12px',
                   borderRadius: '6px',
                   border: '1px solid',
-                  borderColor: isSelected ? 'rgba(99, 102, 241, 0.3)' : 'transparent',
-                  background: isSelected ? 'rgba(99, 102, 241, 0.05)' : 'rgba(255, 255, 255, 0.01)',
-                  color: isSelected ? '#fff' : 'var(--text-muted)',
+                  borderColor: isSelected ? 'var(--primary)' : 'transparent',
+                  background: isSelected ? 'rgba(37, 99, 235, 0.06)' : 'rgba(0, 0, 0, 0.02)',
+                  color: isSelected ? 'var(--text-main)' : 'var(--text-muted)',
                   cursor: 'pointer',
                   textAlign: 'left',
                   transition: 'all 0.2s'
                 }}
               >
-                <div style={{ fontWeight: 600, fontSize: '0.82rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <div style={{ fontWeight: 600, fontSize: '0.82rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: isSelected ? 'var(--text-main)' : 'var(--text-muted)' }}>
                   {sc.name}
                 </div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'flex', gap: '8px' }}>

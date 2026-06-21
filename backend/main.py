@@ -9,7 +9,7 @@ from backend.assessment.damage_engine import DamageEngine
 from backend.validation.scenario_validator import validate_scenario_params, ValidationError
 from backend.studies.sweep_engine import SweepEngine
 from backend.studies.material_ranker import MaterialRanker
-from backend.studies.batch_runner import BatchRunner, export_sweep_to_csv
+from backend.studies.batch_runner import BatchRunner, export_sweep_to_csv, _check_limit
 
 class StdioServer:
     def __init__(self):
@@ -83,8 +83,12 @@ class StdioServer:
         profiles_data = []
         for pid in profile_ids:
             cursor.execute("""
-                SELECT mp.*, mp.name AS profile_name
+                SELECT mp.*, t.minor_pressure, t.minor_impulse, t.moderate_pressure, t.moderate_impulse,
+                       t.severe_pressure, t.severe_impulse, t.failure_pressure, t.failure_impulse, m.family,
+                       t.failure_description, t.threshold_source_type, t.applicability_notes
                 FROM material_profiles mp
+                JOIN materials m ON mp.material_id = m.id
+                LEFT JOIN thresholds t ON mp.id = t.profile_id
                 WHERE mp.id = ?
             """, (pid,))
             prof_row = cursor.fetchone()
@@ -94,11 +98,12 @@ class StdioServer:
 
             # Load response curves for this profile
             cursor.execute("""
-                SELECT damage_state, curve_type, pressure_asymptote,
-                       impulse_asymptote, curve_constant, equation_text,
-                       source_reference, confidence_level
-                FROM material_response_curves
-                WHERE profile_id = ?
+                SELECT c.damage_state, c.curve_type, c.pressure_asymptote,
+                       c.impulse_asymptote, c.curve_constant, c.equation_text,
+                       s.title AS source_reference, c.confidence_level
+                FROM material_response_curves c
+                LEFT JOIN sources s ON c.source_id = s.id
+                WHERE c.profile_id = ?
             """, (pid,))
             prof["curves"] = [dict(r) for r in cursor.fetchall()]
             profiles_data.append(prof)
@@ -107,6 +112,14 @@ class StdioServer:
 
     def route(self, channel: str, payload: dict):
         """Routes the Electron IPC channel to database queries or calculations."""
+        if channel == "system:ping":
+            if payload.get("simulate_freeze"):
+                import time
+                time.sleep(15)
+            if payload.get("simulate_crash"):
+                sys.exit(42)
+            return "pong"
+            
         conn = self.db.get_connection()
         try:
             if channel == "scenarios:list":
@@ -128,6 +141,7 @@ class StdioServer:
                 validate_scenario_params(weight, distance, burst_type)
 
                 with conn:
+                    conn.execute("BEGIN IMMEDIATE")
                     # Save scenario parameters
                     cursor.execute("""
                         INSERT OR REPLACE INTO scenarios 
@@ -242,22 +256,32 @@ class StdioServer:
                 cursor.execute("SELECT * FROM validation_cases")
                 cases = [dict(row) for row in cursor.fetchall()]
                 
+                # Fetch explosive factors lookup map
+                cursor.execute("SELECT name, pressure_equivalency, impulse_equivalency, general_equivalency FROM explosives")
+                exp_map = {r["name"]: (r["pressure_equivalency"], r["impulse_equivalency"], r["general_equivalency"]) for r in cursor.fetchall()}
+                
                 with conn:
+                    # Execute BEGIN IMMEDIATE for writes
+                    conn.execute("BEGIN IMMEDIATE")
                     for case in cases:
+                        exp_name = case["explosive_name"]
+                        p_factor, i_factor, g_factor = exp_map.get(exp_name, (1.0, 1.0, 1.0))
+                        if g_factor is None:
+                            g_factor = p_factor
+
                         # Perform calculation using Kingery-Bulmash (Swisdak 1994)
-                        # Reference is TNT (equivalence = 1.0)
                         calc = BlastCalculatorService.calculate_environment(
                             charge_weight=case["charge_weight"],
                             distance=case["distance"],
                             burst_type=case["burst_type"],
-                            pressure_factor=1.0,
-                            impulse_factor=1.0,
-                            general_factor=1.0,
+                            pressure_factor=p_factor,
+                            impulse_factor=i_factor,
+                            general_factor=g_factor,
                             model="Kingery-Bulmash"
                         )
                         
                         p_calc = calc["incident_pressure"]
-                        i_calc = calc["positive_impulse"]
+                        i_calc = calc["positive_impulse_scaled"]
                         
                         p_abs = abs(p_calc - case["reference_pressure"])
                         p_rel = (p_abs / case["reference_pressure"]) * 100.0
@@ -339,6 +363,7 @@ class StdioServer:
             elif channel == "scenarios:saveNote":
                 cursor = conn.cursor()
                 with conn:
+                    conn.execute("BEGIN IMMEDIATE")
                     cursor.execute("""
                         INSERT INTO notes (scenario_id, note) VALUES (?, ?)
                     """, (payload.get("scenarioId"), payload.get("note")))
@@ -462,7 +487,35 @@ class StdioServer:
                     source = row["source_title"] or "UFC 3-340-02"
                     
                     points = []
-                    if curve_type == "Hyperbolic" and p0 and i0 and kc:
+                    if curve_type == "Piecewise" and row["equation_text"]:
+                        try:
+                            import json
+                            pts = json.loads(row["equation_text"])
+                            pts = sorted(pts, key=lambda x: x[0])
+                            i_start = pts[0][0]
+                            i_end = max(pts[-1][0] * 3, 20000.0)
+                            
+                            log_start = math.log10(i_start)
+                            log_end = math.log10(i_end)
+                            step = (log_end - log_start) / 299
+                            for idx in range(300):
+                                imp = 10 ** (log_start + idx * step)
+                                if imp < pts[0][0]:
+                                    press = 999999.0
+                                elif imp >= pts[-1][0]:
+                                    press = pts[-1][1]
+                                else:
+                                    press = pts[-1][1]
+                                    for pidx in range(len(pts) - 1):
+                                        i1, p1 = pts[pidx]
+                                        i2, p2 = pts[pidx+1]
+                                        if i1 <= imp <= i2:
+                                            press = p1 + (p2 - p1) * (imp - i1) / (i2 - i1)
+                                            break
+                                points.append({"impulse": imp, "pressure": press})
+                        except Exception:
+                            pass
+                    elif curve_type == "Hyperbolic" and p0 and i0 and kc:
                         start_val = 1.1 * i0 if i0 > 0 else 1.0
                         end_val = max(start_val * 100, 20000.0)
                         
@@ -609,6 +662,7 @@ class StdioServer:
                 profile_ids  = payload["profile_ids"]
                 burst_type   = payload.get("burst_type", "Surface")
 
+                _check_limit(len(distances_m) * len(profile_ids))
                 explosive, profiles_data = self._fetch_study_data(conn, explosive_id, profile_ids)
                 return SweepEngine.distance_sweep(explosive, charge_kg, distances_m, profiles_data, burst_type)
 
@@ -623,6 +677,7 @@ class StdioServer:
                 profile_ids  = payload["profile_ids"]
                 burst_type   = payload.get("burst_type", "Surface")
 
+                _check_limit(len(charges_kg) * len(profile_ids))
                 explosive, profiles_data = self._fetch_study_data(conn, explosive_id, profile_ids)
                 return SweepEngine.charge_sweep(explosive, charges_kg, distance_m, profiles_data, burst_type)
 
@@ -637,6 +692,7 @@ class StdioServer:
                 profile_ids   = payload["profile_ids"]
                 burst_type    = payload.get("burst_type", "Surface")
 
+                _check_limit(len(explosive_ids) * len(distances_m) * len(profile_ids))
                 cursor = conn.cursor()
                 explosives = []
                 for eid in explosive_ids:
@@ -672,6 +728,157 @@ class StdioServer:
                 save_path    = payload.get("save_path")  # None → fallback to Documents
                 written_path = export_sweep_to_csv(sweep_points, save_path)
                 return {"path": written_path, "n_rows": len(sweep_points)}
+
+            # ----------------------------------------------------------------
+            # inverse:predict
+            # Payload: {burstType, incident_pressure, reflected_pressure, positive_impulse, reflected_impulse, arrival_time, positive_duration}
+            # ----------------------------------------------------------------
+            elif channel == "inverse:predict":
+                import joblib
+                import os
+                import numpy as np
+
+                # Load model package from models directory
+                model_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "blast_engine", "models"))
+                model_path = os.path.join(model_dir, "inverse_characterization_model.joblib")
+                if not os.path.exists(model_path):
+                    raise FileNotFoundError("Trained inverse characterization model not found. Run train_baseline.py first.")
+
+                package = joblib.load(model_path)
+                model = package["model"]
+                features = package["features"]
+                features_to_log = package["features_to_log"]
+                best_model_name = package["best_model_name"]
+
+                # Extract inputs
+                burst_type = payload.get("burstType", "Free Air")
+                is_surface = 1 if burst_type == "Surface" else 0
+
+                # Assemble feature values
+                feat_dict = {
+                    "is_surface": is_surface
+                }
+
+                # Safe log transform helper (avoid log10(0))
+                def safe_log(val):
+                    val = float(val) if val is not None else 0.0
+                    return float(np.log10(max(val, 1e-8)))
+
+                # Map log-transformed values
+                for col in features_to_log:
+                    val = payload.get(col)
+                    feat_dict[f"log_{col}"] = safe_log(val)
+
+                import pandas as pd
+                # Construct X DataFrame for model prediction (preserves feature names to avoid warnings)
+                X_df = pd.DataFrame([[feat_dict[f] for f in features]], columns=features)
+
+                # Predict
+                preds_log = model.predict(X_df)
+                
+                # Back-transform outputs
+                pred_log_w = float(preds_log[0, 0])
+                pred_log_z = float(preds_log[0, 1])
+
+                weight = 10 ** pred_log_w
+                scaled_distance = 10 ** pred_log_z
+                distance = scaled_distance * (weight ** (1.0 / 3.0))
+
+                # Calculate confidence score via calibrated isotonic probability and run OOD detection
+                is_ood = False
+                feature_mins = package.get("feature_mins", {})
+                feature_maxs = package.get("feature_maxs", {})
+                
+                # 1. Feature Bounds Check
+                for col in features_to_log:
+                    val = payload.get(col)
+                    if val is not None and float(val) > 1e-4:
+                        log_val = np.log10(float(val))
+                        min_val = feature_mins.get(f"log_{col}")
+                        max_val = feature_maxs.get(f"log_{col}")
+                        if min_val is not None and max_val is not None:
+                            if log_val < (min_val - 0.1) or log_val > (max_val + 0.1):
+                                is_ood = True
+
+                # 2. Mahalanobis Distance check for OOD combinations
+                mean_vector = package.get("ood_mahalanobis_mean")
+                inv_cov_matrix = package.get("ood_mahalanobis_inv_cov")
+                mahalanobis_threshold = package.get("ood_mahalanobis_threshold", 22.46)
+                if mean_vector is not None and inv_cov_matrix is not None:
+                    try:
+                        x_log = []
+                        for col in features_to_log:
+                            val = payload.get(col, 0.0)
+                            x_log.append(safe_log(val))
+                        x_log = np.array(x_log)
+                        diff = x_log - mean_vector
+                        d2 = float(diff.dot(inv_cov_matrix).dot(diff))
+                        if d2 > mahalanobis_threshold:
+                            is_ood = True
+                    except Exception:
+                        pass
+
+                # 3. Parameterized Target Bounds Check
+                training_bounds = package.get("training_bounds", {})
+                w_min = training_bounds.get("w_min", 0.1)
+                w_max = training_bounds.get("w_max", 10000.0)
+                z_min = training_bounds.get("z_min", 0.06)
+                z_max = training_bounds.get("z_max", 40.0)
+                if weight > (w_max * 0.99) or weight < (w_min * 1.01) or scaled_distance > (z_max * 0.99) or scaled_distance < (z_min * 1.01):
+                    is_ood = True
+
+                # 4. Physics Cross-Check
+                try:
+                    calc_forward = BlastCalculatorService.calculate_environment(
+                        charge_weight=weight,
+                        distance=distance,
+                        burst_type=burst_type,
+                        pressure_factor=1.0,
+                        impulse_factor=1.0,
+                        general_factor=1.0,
+                        model="Kingery-Bulmash"
+                    )
+
+                    # Compute relative error for non-zero inputs
+                    errors = []
+                    input_keys = ["incident_pressure", "reflected_pressure", "positive_impulse", "reflected_impulse", "arrival_time", "positive_duration"]
+                    for key in input_keys:
+                        in_val = float(payload.get(key, 0))
+                        if in_val > 1e-4:
+                            f_val = float(calc_forward.get(key, 0))
+                            err = abs(in_val - f_val) / in_val
+                            errors.append(err)
+
+                    if errors:
+                        avg_error = sum(errors) / len(errors)
+                        
+                        # Isotonic calibration mapping
+                        iso_model = package.get("isotonic_calibration_model")
+                        if iso_model is not None:
+                            confidence = float(100.0 * iso_model.predict([avg_error])[0])
+                        else:
+                            best_lambda = package.get("calibration_lambda", 2.3)
+                            confidence = float(100.0 * np.exp(-best_lambda * avg_error))
+                            
+                        if avg_error > 0.20:
+                            is_ood = True
+                    else:
+                        confidence = 95.0
+                except Exception:
+                    confidence = 80.0
+                    is_ood = True
+
+                if is_ood:
+                    confidence = min(confidence, 15.0)
+
+                return {
+                    "weight": weight,
+                    "scaled_distance": scaled_distance,
+                    "distance": distance,
+                    "confidence": confidence,
+                    "model_used": best_model_name,
+                    "ood": is_ood
+                }
 
             else:
                 raise ValueError(f"Unknown channel: {channel}")

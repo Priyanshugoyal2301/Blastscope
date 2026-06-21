@@ -1,27 +1,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  --bg-main: #0f172a;           /* Dark Slate main workspace background */
-  --bg-sidebar: #0b0f19;        /* Native black-slate sidebar */
-  --bg-card: #1e293b;           /* Solid slate panel background */
-  --bg-card-hover: #334155;     /* Highlighted slate panel */
-  --border-color: #334155;      /* Solid thin slate border */
-  --border-focus: #3b82f6;      /* Solid blue focus border */
+  --bg-main: #F5F7FA;           /* MATLAB/ANSYS Light Workspace Gray */
+  --bg-sidebar: #E9EEF5;        /* Neutral Sidebar Gray */
+  --bg-card: #FFFFFF;           /* Panel background */
+  --bg-card-hover: #F8FAFC;     /* Hover panel */
+  --border-color: #D6DCE5;      /* Solid thin gray border */
+  --border-focus: #2563EB;      /* Engineering Blue */
   
-  --primary: #3b82f6;           /* MATLAB/ANSYS Steel Blue */
-  --primary-hover: #2563eb;     /* Deeper blue */
-  --primary-glow: rgba(59, 130, 246, 0.15);
-  --accent: #64748b;            /* Muted cool slate secondary */
+  --primary: #2563EB;           /* Engineering Blue accent */
+  --primary-hover: #1D4ED8;     /* Deeper blue */
+  --primary-glow: rgba(37, 99, 235, 0.15);
+  --accent: #4B5563;            /* Cool slate secondary */
   
-  --text-main: #f8fafc;         /* Crisp white-slate text */
-  --text-muted: #94a3b8;        /* Slate gray text */
-  --text-inverse: #0f172a;
+  --text-main: #1F2937;         /* Dense dark gray text */
+  --text-muted: #4B5563;        /* Slate gray text */
+  --text-inverse: #FFFFFF;      /* White text */
   
-  --status-safe: #10b981;       /* Safe = Green */
-  --status-minor: #eab308;      /* Minor = Yellow */
-  --status-moderate: #f97316;   /* Moderate = Orange */
-  --status-severe: #ef4444;     /* Severe = Red */
-  --status-failure: #ef4444;    /* Failure = Red */
+  --status-safe: #16A34A;       /* Safe = Green */
+  --status-minor: #D97706;      /* Minor = Dark Amber */
+  --status-moderate: #EA580C;   /* Moderate = Orange */
+  --status-severe: #DC2626;     /* Severe = Red */
+  --status-failure: #DC2626;    /* Failure = Red */
 }
 
 * {
@@ -55,11 +55,11 @@ h1, h2, h3, h4, h5, h6 {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #CBD5E1;
   border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #94A3B8;
 }
 
 /* Flat Panel Classes (Replaces Glassmorphism) */
@@ -71,7 +71,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .glass-panel:hover {
-  border-color: #475569;
+  border-color: #94A3B8;
 }
 
 /* Layout Utilities */
@@ -114,7 +114,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .form-input {
-  background: #0b0f19;
+  background: #FFFFFF;
   border: 1px solid var(--border-color);
   color: var(--text-main);
   padding: 8px 12px;
@@ -156,13 +156,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.05);
+  background: #FFFFFF;
   border: 1px solid var(--border-color);
   color: var(--text-main);
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: #F1F5F9;
 }
 
 /* Badges */

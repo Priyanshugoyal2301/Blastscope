@@ -1,0 +1,45 @@
+{
+    "dataset_name": "BlastScope 1M Scenario Scientific Qualification Dataset",
+    "total_samples": 1000000,
+    "physics_model": "Kingery-Bulmash (Swisdak 1994 piecewise polynomial curve fits)",
+    "spherical_burst_equations": "SLSQP optimized continuous spherical polynomials (Sprint 3)",
+    "hemispherical_burst_equations": "Official Swisdak (1994) Table 1 polynomials",
+    "applicability_limits": {
+        "scaled_distance_Z_min_m_kg13": 0.05,
+        "scaled_distance_Z_max_m_kg13": 40.0,
+        "charge_weight_W_min_kg": 0.1,
+        "charge_weight_W_max_kg": 10000.0
+    },
+    "uncertainty_bounds": {
+        "surface_burst_pressure_mean_error": "< 0.2%",
+        "surface_burst_pressure_max_error": "< 1.2%",
+        "surface_burst_impulse_mean_error": "< 0.1%",
+        "surface_burst_impulse_max_error": "< 0.5%",
+        "free_air_burst_pressure_mean_error": "< 2.5%",
+        "free_air_burst_impulse_mean_error": "< 4.2%"
+    },
+    "parameter_classifications": {
+        "direct_kingery_bulmash_parameters": [
+            "incident_pressure_kPa",
+            "reflected_pressure_kPa",
+            "positive_impulse_scaled_kPa_ms",
+            "reflected_impulse_scaled_kPa_ms",
+            "positive_duration_scaled_ms",
+            "arrival_time_scaled_ms"
+        ],
+        "derived_thermodynamic_parameters": [
+            "dynamic_pressure_kPa",
+            "shock_front_velocity_m_s",
+            "particle_velocity_m_s"
+        ],
+        "numerical_estimates": [
+            "decay_parameter",
+            "negative_duration_scaled_ms"
+        ]
+    },
+    "environmental_constants": {
+        "P0_ambient_pressure_kPa": 101.325,
+        "C0_speed_of_sound_m_s": 340.292
+    },
+    "contact": "BlastScope Physics Engine Scientific Verification Group"
+}

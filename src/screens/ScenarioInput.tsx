@@ -122,7 +122,7 @@ export default function ScenarioInput({
       <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <h2 style={{ fontSize: '1.25rem', color: '#fff' }}>Configure Scenario</h2>
+            <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)' }}>Configure Scenario</h2>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Define physical environment boundaries</span>
           </div>
 
@@ -248,7 +248,7 @@ export default function ScenarioInput({
       {/* Research Notes Card */}
       <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div>
-          <h2 style={{ fontSize: '1.25rem', color: '#fff' }}>Research Notebook</h2>
+          <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)' }}>Research Notebook</h2>
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Annotate experimental configurations</span>
         </div>
 
