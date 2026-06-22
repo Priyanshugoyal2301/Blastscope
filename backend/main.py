@@ -11,6 +11,13 @@ from backend.studies.sweep_engine import SweepEngine
 from backend.studies.material_ranker import MaterialRanker
 from backend.studies.batch_runner import BatchRunner, export_sweep_to_csv, _check_limit
 
+# Force PyInstaller to bundle scikit-learn modules for unpickling the inverse model
+import sklearn
+from sklearn.multioutput import MultiOutputRegressor
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.isotonic import IsotonicRegression
+
+
 class StdioServer:
     def __init__(self):
         # Database initialized with force_rebuild=True during dev restart

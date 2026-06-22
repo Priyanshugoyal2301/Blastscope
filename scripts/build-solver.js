@@ -52,8 +52,10 @@ const args = [
   '--name', 'blastscope-solver',
   '--distpath', distPath,
   '--workpath', buildPath,
+  '--paths', '.',
   '--add-data', 'backend/database/schema.sql;backend/database',
   '--add-data', 'backend/database/migrations;backend/database/migrations',
+  '--add-data', 'backend/blast_engine/models;blast_engine/models',
   'backend/main.py'
 ];
 
